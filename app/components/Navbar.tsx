@@ -6,8 +6,8 @@ import Button from './Button';
 
 const Navbar = () => {
   return (
-    <nav className="w-full h-20 p-4 text-white flex justify-between items-center">
-        <div className='flex justify-center items-center h-full w-60'>
+    <nav className="w-full h-20 p-4 text-white flex justify-around items-center cursor-pointer">
+        <div className='flex justify-center items-center h-full w-fit '>
           <Image src="/logo.png" alt="Logo" className='h-15 w-15' width={100} height={10} />
           <p className='text-2xl'>Supabricx</p>
         </div>
@@ -20,8 +20,8 @@ const Navbar = () => {
         </div>
 
         
-        <div className='flex justify-evenly items-center h-full w-100'>
-            <LinkedinLogo size={32} />
+        <div className='flex justify-between gap-2 items-center h-full w-fit'>
+            {/* <LinkedinLogo size={32} /> */}
             <GithubLogo size={32} />
             <Button
               title="Join the Beta"
