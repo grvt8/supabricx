@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, KeyboardEvent } from "react";
+import React, { useState, useEffect } from "react";
 
 type Message = {
   id: number;
@@ -27,14 +27,14 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ isOpen, onClose }) => {
     if (!isOpen) {
       return;
     }
-    const handler = (event: KeyboardEvent | any) => {
+    const handler = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
         onClose();
       }
     };
-    window.addEventListener("keydown", handler as any);
+    window.addEventListener("keydown", handler);
     return () => {
-      window.removeEventListener("keydown", handler as any);
+      window.removeEventListener("keydown", handler);
     };
   }, [isOpen, onClose]);
 
@@ -76,9 +76,13 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ isOpen, onClose }) => {
       onClick={onClose}
     >
       <div
-        className="mb-8 mr-8 flex w-full max-w-md flex-col rounded-3xl border border-white/10 bg-[#121212] p-4 shadow-[0_18px_60px_rgba(0,0,0,0.8)]"
+        className="relative mb-8 mr-8 flex w-full max-w-md flex-col rounded-3xl border border-white/10 bg-[#121212] p-4 shadow-[0_18px_60px_rgba(0,0,0,0.8)]"
         onClick={(event) => event.stopPropagation()}
       >
+        <span className="pointer-events-none absolute left-0 top-0 h-6 w-6 border-l border-t border-emerald-400/70" />
+        <span className="pointer-events-none absolute right-0 top-0 h-6 w-6 border-r border-t border-emerald-400/70" />
+        <span className="pointer-events-none absolute bottom-0 left-0 h-6 w-6 border-b border-l border-emerald-400/70" />
+        <span className="pointer-events-none absolute bottom-0 right-0 h-6 w-6 border-b border-r border-emerald-400/70" />
         <div className="mb-3 flex items-center justify-between">
           <div className="flex flex-col">
             <span className="text-sm font-medium text-[#a3a3a3]">Supabricx</span>
