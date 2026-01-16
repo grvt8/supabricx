@@ -3,6 +3,7 @@ import Image from "next/image";
 import React, { useState } from "react";
 import { ArrowUpRight, GithubLogo } from "@phosphor-icons/react";
 import Button from "./Button";
+import LivingDotLogo from "./LivingDotLogo";
 import ChatInterface from "./ChatInterface";
 
 const Navbar = () => {
@@ -20,7 +21,8 @@ const Navbar = () => {
     <>
       <nav className="w-full h-20 p-4 text-white flex justify-around items-center cursor-pointer">
         <div className="flex justify-center items-center h-full w-fit">
-          <Image src="/logo.png" alt="Logo" className="h-15 w-15" width={100} height={10} />
+          {/* <Image src="/logo.png" alt="Logo" className="h-15 w-15" width={100} height={10} /> */}
+          <LivingDotLogo/>
           <p className="text-2xl">Supabricx</p>
         </div>
         <div className="flex justify-evenly items-center h-full w-100 bg-white/5 backdrop-blur-md border border-white/10 rounded-[30px] shadow-lg">

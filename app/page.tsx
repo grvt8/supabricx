@@ -14,7 +14,7 @@ export default function Home() {
           <div className="flex flex-col items-center gap-10">
             <div className="flex flex-col items-center gap-4 text-center">
               <span className="rounded-full border border-emerald-500/30 bg-emerald-500/10 px-4 py-1 text-xs font-medium tracking-wide text-emerald-300">
-                Supabricx AI Builder
+                Build brick by brick at supa speed
               </span>
               <div className="space-y-3">
                 <h1 className="text-3xl font-semibold md:text-5xl">
@@ -31,42 +31,40 @@ export default function Home() {
             </div>
 
             <div className="w-full max-w-2xl">
-              <div className="relative overflow-hidden rounded-3xl border border-white/8 bg-black/70 px-5 pb-4 pt-5 backdrop-blur-md">
-                <div className="mb-4 flex items-center gap-3">
-                  <div className="flex-1 rounded-2xl bg-[#111111] px-4 py-3 text-sm text-zinc-300">
-                    Ask Supabricx to create a backend prototype
-                  </div>
+              <div className="relative overflow-visible border border-white/10 bg-transparent px-1 pb-2 pt-1">
+                <span className="pointer-events-none absolute -left-px top-5 h-4 w-4 border-l border-t border-emerald-400/60" />
+                <span className="pointer-events-none absolute right-10 -top-px h-4 w-4 border-r border-t border-emerald-400/40" />
+                <span className="pointer-events-none absolute left-10 -bottom-px h-4 w-4 border-l border-b border-emerald-400/40" />
+                <span className="pointer-events-none absolute -right-px bottom-4 h-4 w-4 border-r border-b border-emerald-400/60" />
+                <span className="pointer-events-none absolute -left-px -top-px h-5 w-px bg-emerald-400/80" />
+                <span className="pointer-events-none absolute -left-px -top-px w-5 h-px bg-emerald-400/80" />
+
+                <div className="relative flex items-center gap-3 border border-zinc-800 bg-[#05070a]/95 px-4 py-3 shadow-[0_18px_50px_rgba(0,0,0,0.9)]">
+                  <span className="pointer-events-none absolute -left-10 top-1/2 h-24 w-24 -translate-y-1/2 rounded-full bg-emerald-500/30 blur-3xl" />
+                  <span className="pointer-events-none absolute -right-10 top-1/2 h-24 w-24 -translate-y-1/2 rounded-full bg-sky-500/30 blur-3xl" />
+
+                  <span className="h-4 w-px bg-gradient-to-b from-emerald-400/80 via-emerald-300/40 to-transparent" />
+                  <input
+                    type="text"
+                    placeholder="Ask anything..."
+                    className="flex-1 bg-transparent text-sm text-zinc-200 outline-none placeholder:text-zinc-500"
+                  />
                   <button
                     type="button"
-                    className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-gradient-to-tr from-emerald-400 via-emerald-300 to-sky-400 text-black shadow-[0_14px_40px_rgba(34,197,94,0.55)]"
+                    className="agentic-toggle"
                   >
-                    <span className="text-lg">➜</span>
+                    <span className="text-sm">✦</span>
+                    <span className="text-sm">Agentic</span>
+                    <span className="text-xs">▾</span>
+                  </button>
+                  <button
+                    type="button"
+                    className="cook-button"
+                  >
+                    <span>Cook</span>
+                    <span className="text-base">➜</span>
                   </button>
                 </div>
-
-                <div className="flex items-center justify-between text-[11px] text-zinc-500">
-                  <div className="flex items-center gap-2">
-                    <button
-                      type="button"
-                      className="flex items-center gap-1 rounded-full border border-zinc-700 bg-black/60 px-3 py-1"
-                    >
-                      <span className="text-base leading-none">+</span>
-                      <span>Attach</span>
-                    </button>
-                    <button
-                      type="button"
-                      className="flex items-center gap-1 rounded-full border border-zinc-700 bg-black/60 px-3 py-1"
-                    >
-                      <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
-                      <span>Public</span>
-                    </button>
-                  </div>
-                  <span className="uppercase tracking-[0.16em] text-zinc-600">
-                    Supabricx chat workspace
-                  </span>
-                </div>
-
-                <div className="pointer-events-none absolute inset-x-0 bottom-0 h-1.5 bg-gradient-to-r from-emerald-400 via-emerald-300 to-sky-400" />
               </div>
             </div>
 
