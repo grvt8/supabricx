@@ -19,12 +19,12 @@ button::before {
   background: linear-gradient(
     90deg,
     transparent 0%,
-    rgb(255, 126, 56, 0.8) 20%,
-    rgb(255, 158, 61, 1) 50%,
-    rgb(250, 127, 51, 0.2) 80%,
+    rgba(56, 255, 245, 0.8) 20%,
+    rgb(61, 255, 177) 50%,
+    rgba(51, 247, 250, 0.2) 80%,
     transparent 100%
   );
-  box-shadow: 0 0 20px rgba(255, 126, 56, 0.5);
+  box-shadow: 0 0 20px rgba(56, 255, 242, 0.5);
 }
 
 button::after {
@@ -45,11 +45,11 @@ button::after {
 /* Hover/Active States */
 button:hover {
   background: rgba(255, 255, 255, 0.08);
-  border-color: rgba(255, 126, 56, 0.3);
+  border-color: rgba(56, 225, 255, 0.3);
   transform: translateY(-2px);
   box-shadow:
     0 12px 40px rgba(0, 0, 0, 0.4),
-    0 0 30px rgba(255, 126, 56, 0.2),
+    0 0 30px rgba(56, 219, 255, 0.2),
     inset 0 1px 0 rgba(255, 255, 255, 0.15);
 }
 
@@ -57,12 +57,12 @@ button:hover::before {
   background: linear-gradient(
     90deg,
     transparent 0%,
-    rgb(255, 126, 56, 0.8) 20%,
-    rgb(255, 158, 61, 1) 50%,
-    rgb(250, 127, 51, 0.8) 80%,
+    rgba(56, 255, 245, 0.8) 20%,
+    rgb(61, 255, 177) 50%,
+    rgba(51, 247, 250, 0.2) 80%,
     transparent 100%
   );
-  box-shadow: 0 0 30px rgba(255, 126, 56, 0.8);
+  box-shadow: 0 0 20px rgba(56, 255, 195, 0.5);
 }
 
 button:active {
@@ -85,7 +85,6 @@ button:disabled {
   justify-content: center;
   gap: 0.4rem;
   padding: 0.6rem 1.6rem;
-  border-radius: 9999px;
   border: 1px solid rgba(34, 197, 94, 0.6);
   background-image: linear-gradient(90deg, #22c55e, #4ade80, #22c55e);
   color: #ecfdf5;
@@ -145,7 +144,6 @@ button:disabled {
   justify-content: center;
   gap: 0.4rem;
   padding: 0.55rem 1.1rem;
-  border-radius: 9999px;
   border: 1px solid rgba(39, 39, 42, 1);
   background: radial-gradient(circle at top left, rgba(34, 197, 94, 0.15), transparent 40%),
     rgba(15, 15, 15, 0.98);
@@ -166,9 +164,8 @@ button:disabled {
   justify-content: center;
   gap: 0.45rem;
   padding: 0.65rem 1.4rem;
-  border-radius: 9999px;
   border: 1px solid rgba(34, 197, 94, 0.75);
-  background-image: linear-gradient(90deg, #22c55e, #4ade80, #22c55e);
+  background-image: linear-gradient(90deg, rgb(6, 212, 130), rgba(56, 255, 245, 0.8));
   color: #fdfdfd;
   font-size: 0.86rem;
   font-weight: 500;
@@ -178,7 +175,7 @@ button:disabled {
 }
 
 .cook-button:hover {
-  background-image: linear-gradient(90deg, #4ade80, #22c55e, #16a34a);
+  background-image: linear-gradient(90deg, rgb(6, 212, 130), rgba(56, 255, 245, 0.8));
   border-color: rgba(74, 222, 128, 0.95);
   transform: translateY(-1px);
 }

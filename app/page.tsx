@@ -1,3 +1,5 @@
+"use client"
+import { CookingPotIcon } from "@phosphor-icons/react";
 import Navbar from "./components/Navbar";
 
 export default function Home() {
@@ -62,7 +64,7 @@ export default function Home() {
                     className="cook-button"
                   >
                     <span>Cook</span>
-                    <span className="text-base">➜</span>
+                    <CookingPotIcon className="h-4 w-4" />
                   </button>
                 </div>
               </div>
