@@ -3,7 +3,9 @@ import Image from "next/image";
 import React, { useState } from "react";
 import { ArrowUpRight, GithubLogo } from "@phosphor-icons/react";
 import Button from "./Button";
+import LivingDotLogo from "./LivingDotLogo";
 import ChatInterface from "./ChatInterface";
+import LivingCubeDotLogo from "./LivingCubeDotLogo";
 
 const Navbar = () => {
   const [isChatOpen, setIsChatOpen] = useState(false);
@@ -18,12 +20,12 @@ const Navbar = () => {
 
   return (
     <>
-      <nav className="w-full h-20 p-4 text-white flex justify-around items-center cursor-pointer">
-        <div className="flex justify-center items-center h-full w-fit">
-          <Image src="/logo.png" alt="Logo" className="h-15 w-15" width={100} height={10} />
-          <p className="text-2xl">Supabricx</p>
+      <nav className="w-full h-20 p-4 text-white flex justify-between md:justify-around items-center cursor-pointer">
+        <div className="flex justify-center items-center h-full w-fit gap-2">
+          <Image src="/logo.jpeg" alt="Logo" className="h-10 w-10 md:h-15 md:w-15" width={100} height={10} />
+          <p className="text-xl md:text-2xl">Supabricx</p>
         </div>
-        <div className="flex justify-evenly items-center h-full w-100 bg-white/5 backdrop-blur-md border border-white/10 rounded-[30px] shadow-lg">
+        <div className="hidden md:flex justify-evenly items-center h-full w-100 bg-white/5 backdrop-blur-md border border-white/10 shadow-lg">
           <p>Product</p>
           <p>Docs</p>
           <p>APIs</p>
@@ -34,12 +36,14 @@ const Navbar = () => {
             className="cursor-pointer text-white/80 transition hover:text-white"
             onClick={handleGithubClick}
           />
-          <Button
-            title="Join the Beta"
-            Icon={ArrowUpRight}
-            width="220px"
-            height="60px"
-          />
+          <div className="hidden md:block">
+            <Button
+              title="Join the Beta"
+              Icon={ArrowUpRight}
+              width="220px"
+              height="60px"
+            />
+          </div>
         </div>
       </nav>
       <ChatInterface isOpen={isChatOpen} onClose={handleCloseChat} />
