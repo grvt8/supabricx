@@ -3,9 +3,7 @@ import Image from "next/image";
 import React, { useState } from "react";
 import { ArrowUpRight, GithubLogo } from "@phosphor-icons/react";
 import Button from "./Button";
-import LivingDotLogo from "./LivingDotLogo";
 import ChatInterface from "./ChatInterface";
-import LivingCubeDotLogo from "./LivingCubeDotLogo";
 
 const Navbar = () => {
   const [isChatOpen, setIsChatOpen] = useState(false);
