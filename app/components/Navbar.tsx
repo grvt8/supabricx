@@ -22,7 +22,7 @@ const Navbar = () => {
     <>
       <nav className="w-full h-20 p-4 text-white flex justify-between md:justify-around items-center cursor-pointer">
         <div className="flex justify-center items-center h-full w-fit gap-2">
-          <Image src="/logo.jpeg" alt="Logo" className="h-10 w-10 md:h-15 md:w-15" width={100} height={10} />
+          <Image src="/logo.png" alt="Logo" className="h-10 w-10 md:h-15 md:w-15" width={100} height={10} />
           <p className="text-xl md:text-2xl">Supabricx</p>
         </div>
         <div className="hidden md:flex justify-evenly items-center h-full w-100 bg-white/5 backdrop-blur-md border border-white/10 shadow-lg">
