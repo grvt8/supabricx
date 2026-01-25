@@ -1,5 +1,5 @@
 "use client"
-import { CodeBlockIcon, CookingPotIcon } from "@phosphor-icons/react";
+import { CodeBlockIcon } from "@phosphor-icons/react";
 import Navbar from "./components/Navbar";
 
 export default function Home() {
