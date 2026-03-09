@@ -2,18 +2,25 @@
 @import "tailwindcss";
 
 @theme {
-  --color-background: #FFFFFF;
+  --color-background: #ffe9cf;
   --color-foreground: #ffffff;
   --color-card-bg: #171717;
   --color-border-dark: #262626;
   --color-muted: #a3a3a3;
-  --color-orange-400: #fb923c;
-  --color-orange-500: #f97316;
+  --color-mainColor: #FFB563;
+  --color-subColor: #F85E00;
   
-  --font-display: var(--font-dynapuff), sans-serif;
-  --font-mono: var(--font-dm-mono), monospace;
+  --font-dynapuff: var(--font-dynapuff), sans-serif;
+  --font-dm-mono: var(--font-dm-mono), monospace;
+}
 
-  --image-gradient-orange: linear-gradient(to right, #fb923c, #f97316);
+/* Typography Defaults */
+h1, h2, h3, h4, h5, h6, .font-dynapuff {
+  font-family: var(--font-dynapuff);
+}
+
+body, p, span, div, a, button, input, textarea, .font-dm-mono {
+  font-family: var(--font-dm-mono);
 }
 
 /* Custom Utilities */
@@ -33,7 +40,7 @@
 }
 
 body{
-  background-color: #FFB563 ;
+  background-color: #ffe9cf ;
 }
 
 /* Glassmorphic button gradients */
