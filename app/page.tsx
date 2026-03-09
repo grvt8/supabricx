@@ -3,6 +3,7 @@ import { CodeBlockIcon } from "@phosphor-icons/react";
 import Navbar from "./components/Navbar";
 import Features from "@/components/landing/Features";
 import Pricing from "@/components/landing/Pricing";
+import Footer from "@/components/Footer";
 
 export default function Home() {
   return (
@@ -47,6 +48,11 @@ export default function Home() {
         {/* Pricing Section */}
         <div className="bg-[#050608] w-full border-t border-white/5">
           <Pricing />
+        </div>
+
+        {/* Footer Section */}
+        <div className="bg-[#EAE5D9] w-full border-t border-white/5">
+          <Footer />
         </div>
       </main>
     </div>
