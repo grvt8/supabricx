@@ -4,7 +4,7 @@ import Navbar from "./components/Navbar";
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-[#050608] text-white">
+    <div className="min-h-screen bg-[#ffe9cf] text-white">
       <Navbar />
       <main className="mx-auto flex max-w-6xl flex-1 flex-col items-center justify-center px-4 pb-12 pt-10 md:pb-24 md:pt-16">
         <section className="relative w-full rounded-2xl md:rounded-[32px] border border-white/5 bg-gradient-to-b from-[#050608] via-[#050b08] to-black px-4 py-10 md:px-6 md:py-16 shadow-[0_24px_80px_rgba(0,0,0,0.8)]">
