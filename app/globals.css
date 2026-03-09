@@ -1,8 +1,8 @@
-@import url('https://fonts.googleapis.com/css2?family=Source+Code+Pro:ital,wght@0,200..900;1,200..900&display=swap');
+
 @import "tailwindcss";
 
 @theme {
-  --color-background: #0a0a0a;
+  --color-background: #FFFFFF;
   --color-foreground: #ffffff;
   --color-card-bg: #171717;
   --color-border-dark: #262626;
@@ -32,11 +32,8 @@
   background-size: 32px 32px;
 }
 
-* {
-  font-family: "Source Code Pro", monospace;
-}
 body{
-  background-color: #0a0a0a;
+  background-color: #FFB563 ;
 }
 
 /* Glassmorphic button gradients */
