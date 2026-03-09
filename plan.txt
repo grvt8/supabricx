@@ -1,0 +1,271 @@
+Build a production-ready homepage for Vexel - an AI-powered architecture design tool for developers. Create a modern, minimalist single-page website with the following specifications:
+
+## 📦 TECH STACK
+- Framework: Next.js (App Router) with TypeScript
+- Styling: Tailwind CSS v4,2+
+- Animations: Framer Motion for smooth transitions
+- Icons: Lucide React
+- Components: Radix UI primitives
+- Fonts: DynaPuff (main), DM Mono (code)
+- Deployment: Vercel-ready
+
+## 🎨 DESIGN SYSTEM
+
+### Colors (Tailwind Config)
+```javascript
+colors: {
+  background: '#FFFFFF',
+  foreground: '#000000',
+  border: '#E5E5E5',
+  muted: '#737373',
+  'muted-foreground': '#A3A3A3',
+  accent: '#FAFAFA',
+  'accent-foreground': '#000000',
+}   Background Pattern
+Implement subtle DOT pattern (NOT grid lines)
+Dot specs: 1px diameter, #E5E5E5 color, 40% opacity
+Spacing: 24px horizontal and vertical
+Implementation: CSS radial-gradient or SVG pattern
+Should be very subtle and not distracting
+Typography
+Headings: Inter, font-weight 600-700
+Body: Inter, font-weight 400-500
+Code: JetBrains Mono, font-weight 400
+Base size: 16px, scale: 1.25 (major third)
+Spacing Scale
+Use Tailwind's default spacing (4, 8, 12, 16, 20, 24, 32, 48, 64, etc.)
+Section padding: py-20 on desktop, py-12 on mobile
+Container max-width: 1280px (mx-auto)
+🏗️ COMPONENT ARCHITECTURE
+File Structure /app
+  /page.tsx (homepage)
+  /layout.tsx (root layout)
+  /globals.css (global styles with dot pattern)
+/components
+  /ui (reusable UI components)
+    Button.tsx
+    Card.tsx
+    Input.tsx
+    Badge.tsx
+  /layout
+    Header.tsx
+    Footer.tsx
+  /sections
+    HeroSection.tsx
+    FeaturesBentoGrid.tsx
+    UseCasesSection.tsx
+    IntegrationsSection.tsx
+    SocialProofSection.tsx
+    PricingSection.tsx
+    CTASection.tsx
+  /shared
+    DotBackground.tsx
+    BentoCard.tsx
+    SectionHeading.tsx
+/lib
+  /utils.ts (cn helper, etc.)
+/public
+  /images (diagram previews, logos)
+
+📄 PAGE SECTIONS IMPLEMENTATION
+1. Header/Navigation Component
+typescript
+1234567
+// Fixed position, 64px height
+// Left: logo.jpeg in public folder + "Vexel" text
+// Center: Nav links (Features, Pricing, Docs)
+// Right: "Sign In" (ghost button) + "Get Started" (primary button)
+// Border-bottom: 1px border-border
+// Sticky top-0, backdrop-blur-sm, bg-background/80
+// Mobile: hamburger menu (hidden on desktop)
+2. Hero Section
+typescript
+123456789101112131415161718192021
+// Min-height: 90vh, centered content
+// H1: "Design systems. Generate code. Architect intelligently."
+//   - Text-4xl md:text-6xl lg:text-7xl, font-bold, tracking-tight
+//   - Max-w-4xl, text-center
+// Subheading: "AI-powered architecture diagrams..."
+//   - Text-xl md:text-2xl, text-muted-foreground
+//   - Max-w-2xl, text-center, mt-6
+// Diagram Preview Cards (4 cards, overlapping):
+//   - Use absolute positioning with slight rotations
+//   - Card 1: System Architecture (z-30, translate-y-0)
+
+3. Features Bento Grid Section
+typescript
+1234567891011121314151617181920212223
+// Section padding: py-24
+// Heading: "Everything you need to architect better systems"
+//   - Text-3xl md:text-4xl, font-bold, text-center, mb-16
+// Grid: grid grid-cols-1 md:grid-cols-3 gap-6
+// Cards (6 total, varying spans):
+//   Card 1 (col-span-2 row-span-2): "AI Diagram Generation"
+//     - Large card showing chat interface preview
+//   Card 2 (col-span-1): "GitHub Import"
+//     - Icon: GitBranch, title, description
+//   Card 3 (col-span-1): "Code Scaffolding"
+
+4. Use Cases Section
+typescript
+123456789
+// Background: bg-accent/30
+// Grid: grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6
+// 4 cards:
+//   - "Startup CTOs" - "Validate architecture before writing code"
+//   - "Enterprise Architects" - "Document systems with auto-sync"
+//   - "DevOps Engineers" - "Generate infrastructure code"
+//   - "Engineering Managers" - "Onboard team with visual maps"
+// Each card: border, rounded-lg, p-6, bg-background
+// Icon at top, title, description, small quote snippet
+5. Integrations Section
+typescript
+123456789
+// Heading: "Works with your existing stack"
+// Grid: grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4
+// 6 integration cards:
+//   GitHub, GitLab, AWS, Kubernetes, Terraform, VS Code
+// Each card:
+//   - 120x120px, border, rounded-lg, flex center
+//   - Logo (monochrome), name below
+//   - Hover: border-foreground transition
+// Link below: "View all 30+ integrations →"
+6. Social Proof Section
+typescript
+123456
+// Heading: "Trusted by engineering teams at"
+// Logo row: 5-6 company logos (grayscale, opacity-60)
+// Testimonials (3 cards horizontal):
+//   - Quote text, author name, role, company
+//   - Small avatar circle (placeholder)
+//   - Border, rounded-lg, p-6
+7. Pricing Section
+typescript
+1234567891011121314
+// Heading: "Simple, transparent pricing"
+// Grid: grid grid-cols-1 md:grid-cols-3 gap-8
+// 3 pricing cards:
+//   Free: "$0/mo" - 1 project, basic diagrams
+//   Pro: "$19/mo" - Unlimited, AI features (highlighted)
+//     - Border-2 border-foreground, scale-105
+//     - "Most Popular" badge at top
+//   Team: "$49/user/mo" - SSO, audit logs
+// Each card:
+//   - Border, rounded-xl, p-8, bg-background
+
+8. Footer Component
+typescript
+123456
+// Background: bg-foreground, text-background
+// Padding: py-16
+// Grid: grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-8
+// Column 1 (col-span-1): Logo + tagline
+// Columns 2-5: Link groups (Product, Resources, Company, Legal)
+// Bottom row: Copyright + social icons (GitHub, Twitter, LinkedIn)
+🎨 DOT BACKGROUND IMPLEMENTATION
+globals.css
+css
+123456789101112131415161718192021222324252627
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 0 0% 0%;
+    --border: 0 0% 90%;
+  }
+  
+  body {
+    @apply bg-background text-foreground antialiased;
+    background-image: radial-gradient(circle at 1px 1px, rgba(0,0,0,0.08) 1px, transparent 0);
+
+🎬 ANIMATIONS & INTERACTIONS
+Framer Motion Variants
+typescript
+1234567891011121314151617181920
+// Fade up animation for sections
+const fadeUpVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.6 } }
+};
+
+// Stagger children animation
+const staggerContainer = {
+  hidden: { opacity: 0 },
+  visible: {
+
+Scroll Animations
+Use Intersection Observer or Framer Motion's whileInView
+Trigger fade-up when sections enter viewport
+Smooth scroll behavior (scroll-smooth on html)
+🔧 UTILITIES & HELPERS
+lib/utils.ts
+typescript
+12345678910
+import { type ClassValue, clsx } from 'clsx';
+import { twMerge } from 'tailwind-merge';
+
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs));
+}
+
+export function formatPrice(price: number): string {
+  return `$${price}/mo`;
+}
+📱 RESPONSIVE BREAKPOINTS
+Mobile: < 768px (single column, stacked layout)
+Tablet: 768px - 1024px (2 columns where applicable)
+Desktop: 1024px - 1280px (full layout)
+Large: > 1280px (max-width container)
+✅ IMPLEMENTATION CHECKLIST
+Phase 1: Setup
+Initialize Next.js 14 project with TypeScript
+Configure Tailwind CSS with custom colors
+Install dependencies (framer-motion, lucide-react, radix-ui)
+Set up dot background pattern in globals.css
+Create component folder structure
+Phase 2: Core Components
+Build Header component with navigation
+Build Footer component with links
+Create reusable Button, Card, Input components
+Create DotBackground wrapper component
+Create BentoCard component
+Phase 3: Sections
+Implement HeroSection with diagram previews
+Implement FeaturesBentoGrid (6 cards)
+Implement UseCasesSection (4 cards)
+Implement IntegrationsSection (6 logos)
+Implement SocialProofSection (testimonials)
+Implement PricingSection (3 tiers)
+Implement CTASection (final call-to-action)
+Phase 4: Polish
+Add scroll animations with Framer Motion
+Add hover states and transitions
+Ensure responsive design on all sections
+Test on mobile, tablet, desktop
+Optimize images and assets
+Add loading states
+SEO meta tags and Open Graph
+Phase 5: Final
+Performance audit (Lighthouse)
+Accessibility check (WCAG AA)
+Cross-browser testing
+Deploy to Vercel
+📝 CONTENT & COPY
+Use this exact copy:
+Hero:
+H1: "Design systems. Generate code. Architect intelligently."
+Subheading: "AI-powered architecture diagrams that sync with your codebase. Import from GitHub, SRS docs, or chat with AI."
+CTA: "Generate Diagram"
+Features:
+Section heading: "Everything you need to architect better systems"
+Card titles: "AI Diagram Generation", "GitHub Import", "Code Scaffolding", "Real-time Sync", "Team Collaboration", "Export Anywhere"
+Pricing:
+Free: "$0/mo", "1 project, basic diagrams, community support"
+Pro: "$19/mo", "Unlimited projects, AI features, code export, priority support"
+Team: "$49/user/mo", "SSO, audit logs, custom rules, dedicated support"
+🎯 QUALITY REQUIREMENTS
+Performance: Lighthouse score > 90 on all metrics
+Accessibility: WCAG 2.1 AA compliant
+SEO: Proper meta tags, semantic HTML, structured data
+Responsiveness: Flawless on 320px - 2560px widths
+Browser Support: Chrome, Firefox, Safari, Edge (last 2 versions)
+Code Quality: ESLint + Prettier configured, no warnings

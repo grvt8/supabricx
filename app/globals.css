@@ -1,6 +1,37 @@
 @import url('https://fonts.googleapis.com/css2?family=Source+Code+Pro:ital,wght@0,200..900;1,200..900&display=swap');
 @import "tailwindcss";
 
+@theme {
+  --color-background: #0a0a0a;
+  --color-foreground: #ffffff;
+  --color-card-bg: #171717;
+  --color-border-dark: #262626;
+  --color-muted: #a3a3a3;
+  --color-orange-400: #fb923c;
+  --color-orange-500: #f97316;
+  
+  --font-display: var(--font-dynapuff), sans-serif;
+  --font-mono: var(--font-dm-mono), monospace;
+
+  --image-gradient-orange: linear-gradient(to right, #fb923c, #f97316);
+}
+
+/* Custom Utilities */
+.gradient-orange {
+  background-image: linear-gradient(to right, var(--color-orange-400), var(--color-orange-500));
+}
+
+.gradient-orange-text {
+  background-image: linear-gradient(to right, var(--color-orange-400), var(--color-orange-500));
+  background-clip: text;
+  color: transparent;
+}
+
+.bg-dot-pattern {
+  background-image: radial-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+  background-size: 32px 32px;
+}
+
 * {
   font-family: "Source Code Pro", monospace;
 }
