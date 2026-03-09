@@ -4,9 +4,11 @@ import React, { useState } from "react";
 import { ArrowUpRight, GithubLogo } from "@phosphor-icons/react";
 import Button from "./Button";
 import ChatInterface from "./ChatInterface";
+import { useRouter } from "next/navigation";
 
 const Navbar = () => {
   const [isChatOpen, setIsChatOpen] = useState(false);
+  const router = useRouter();
 
   const handleGithubClick = () => {
     setIsChatOpen(true);
@@ -36,10 +38,11 @@ const Navbar = () => {
           />
           <div className="hidden md:block">
             <Button
-              title="Join the Beta"
+              title="Get Started"
               Icon={ArrowUpRight}
               width="220px"
               height="60px"
+              onClick={() => router.push('/canvas')}
             />
           </div>
         </div>

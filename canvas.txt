@@ -1,0 +1,395 @@
+Build a production-ready canvas layout for Supabricx - an AI-powered architecture design tool. Create a three-panel interface with left sidebar (component library), center canvas (node editor), and right sidebar (AI chat).
+
+## 🎨 DESIGN THEME (UPDATED)
+
+### Base Colors
+- Site Background: `#0a0a0a` (deep charcoal black)
+- Primary Accent: Tailwind gradient `from-orange-400 to-orange-500`
+- Text Primary: `#ffffff` / `#f5f5f5`
+- Text Secondary: `#a3a3a3` (muted gray)
+- Borders: `#262626` (subtle dark border)
+- Card Background: `#171717` (slightly lighter than base)
+- Hover Background: `#262626`
+
+### Tailwind Config Extension
+```javascript
+// tailwind.config.js
+theme: {
+  extend: {
+    colors: {
+      background: '#0a0a0a',
+      foreground: '#ffffff',
+      'card-bg': '#171717',
+      'border-dark': '#262626',
+      'muted': '#a3a3a3',
+      orange: {
+        400: '#fb923c',
+        500: '#f97316',
+      }
+    },
+    backgroundImage: {
+      'gradient-orange': 'linear-gradient(to right, #fb923c, #f97316)',
+    },
+    fontFamily: {
+      display: ['var(--font-dynapuff)', 'sans-serif'],
+      mono: ['var(--font-dm-mono)', 'monospace'],
+    }
+  }
+}
+
+Background Pattern
+Subtle DOT pattern (NOT grid lines)
+Dot specs: 1px diameter, #ffffff color, 4% opacity
+Spacing: 32px horizontal and vertical
+Implementation: CSS radial-gradient in globals.css
+Should be barely visible – adds texture without distraction
+Typography
+css
+12345678910111213141516171819
+Icon Library
+Use Phosphor Icons (@phosphor-icons/react)
+Replace all Lucide references with Phosphor equivalents
+Icon size: 20px for UI, 24px for nodes, 16px for inline
+Weight: regular for UI, bold for active states
+📦 TECH STACK
+Framework: Next.js 14 (App Router) with TypeScript
+Styling: Tailwind CSS v4.2+
+Canvas Library: React Flow v11+
+Animations: Framer Motion
+Icons: @phosphor-icons/react
+State Management: Zustand
+Fonts: Dynapuff (display), DM Mono (code)
+🏗️ FILE STRUCTURE
+1234567891011121314151617181920212223242526272829303132333435363738394041424344454647484950
+/app
+  /canvas
+    /page.tsx (main canvas page)
+  /layout.tsx (font + metadata setup)
+  /globals.css (dot pattern + base styles)
+/components
+  /canvas
+    CanvasLayout.tsx (3-panel flex container)
+    TopToolbar.tsx
+    LeftSidebar.tsx
+
+
+link the page to get started in Navbar.tsx <Button
+              title="Get Started"
+              Icon={ArrowUpRight}
+              width="220px"
+              height="60px"
+            />
+📐 COMPONENT SPECIFICATIONS
+1. CanvasLayout.tsx (Main Container)
+typescript
+12345678
+// Three-panel horizontal flex layout
+// h-screen, w-screen, overflow-hidden, bg-background (#0a0a0a)
+// Left Sidebar: fixed 280px (collapsible to 64px), border-r border-border-dark
+// Center Canvas: flex-1, relative, overflow-hidden
+// Right Sidebar: fixed 380px (collapsible to 0px), border-l border-border-dark
+// Resize handles: 3px wide, hover:bg-orange-500/30, cursor-col-resize
+// Collapsed state: persisted to localStorage
+// Transition: width 200ms ease-in-out
+2. TopToolbar.tsx
+typescript
+12345678910111213141516
+// Fixed top, h-14 (56px), border-b border-border-dark
+// bg-card-bg/80 backdrop-blur-md for subtle depth
+// Left section:
+//   - Supabricx logo: Dynapuff font, orange gradient text (bg-clip-text)
+//   - Diagram title: editable Input, font-mono, placeholder "Untitled Diagram"
+//   - Save status: small dot indicator (green=saved, orange=saving, gray=unsaved)
+// Center section:
+//   - Undo/Redo: Phosphor ArrowUturnLeft/Right icons, hover:bg-border-dark
+//   - Zoom: − 100% + buttons, orange gradient bo
+3. LeftSidebar.tsx (Component Library)
+typescript
+1234567891011121314151617181920212223
+// Width: 280px expanded, 64px collapsed
+// bg-card-bg, border-r border-border-dark, overflow-y-auto
+// Header:
+//   - "Components" label: font-display, text-foreground
+//   - Collapse toggle: Phosphor CaretLeft/CaretRight, hover:text-orange-400
+//   - Search input: bg-background, border border-border-dark, placeholder text-muted
+// Category Sections (collapsible with Phosphor CaretDown):
+//   • Compute: Server, Cloud, CPU, Lightning icons
+//   • Data: Database, Table, HardDrive icons  
+//   • M
+4. CanvasArea.tsx (React Flow Implementation)
+typescript
+1234567891011121314151617181920212223242526272829
+// React Flow Provider with custom theme
+// Background: dot pattern from globals.css
+// Default sample nodes on first load:
+//   - API Gateway (top-center, GatewayNode)
+//   - 2x Microservice nodes (below, connected)
+//   - PostgreSQL node (connected to service, solid edge)
+//   - Redis node (connected with dashed "async" edge)
+// React Flow Theme Overrides:
+//   - Background: transparent (dot pattern shows through)
+//   - Edge color: #a3a3a3, selected: orange-400
+
+5. RightSidebar.tsx (AI Chat Panel)
+typescript
+12345678910111213141516171819202122232425262728
+// Width: 380px expanded, 0px collapsed
+// bg-card-bg, border-l border-border-dark, flex-col
+// Header:
+//   - "AI Assistant": font-display, text-foreground
+//   - Clear history: Phosphor Trash icon, hover:text-red-400
+//   - Settings: Phosphor Gear icon, hover:text-orange-400
+//   - Collapse toggle: Phosphor CaretRight
+// Chat History (scrollable, flex-1, p-4):
+//   - User messages:
+//     * Right-aligned, bg-gradient-orange text-white
+
+6. Node Components
+BaseNode.tsx
+typescript
+123456789101112131415
+// Wrapper for all node types
+// Width: 200px default, resizable via handles
+// Container: bg-card-bg, border border-border-dark, rounded-lg, shadow-lg
+// Header bar: h-8, bg-gradient-orange, rounded-t-lg
+//   - Node icon: Phosphor icon, white, 16px
+//   - Node label: font-display, text-white, text-xs, editable on double-click
+//   - Actions menu: Phosphor DotsThreeVertical, dropdown on click
+// Body: p-3, bg-background
+//   - Properties: font-mono, text-xs, text-muted, key-value pairs
+//   - St
+ServiceNode.tsx (Microservice)
+typescript
+12345678
+// Extends BaseNode structure
+// Icon: Phosphor Server or Cube
+// Additional properties (font-mono, text-xs):
+//   - Language: badge with orange border (Python/Node/Go)
+//   - Port: ":8080" format
+//   - Health: status dot + "OK"/"Degraded"
+//   - Instances: "x3" badge
+// Visual: subtle code-bracket decoration in corner (Phosphor Code, 10% opacity)
+DatabaseNode.tsx
+typescript
+12345678
+// Extends BaseNode structure  
+// Icon: Phosphor Database
+// Additional properties:
+//   - Type: "PostgreSQL" / "MongoDB" badge
+//   - Connection: masked string "postgres://***"
+//   - Storage: "50GB" indicator
+//   - Replicas: "1 primary + 2 read" text
+// Visual: subtle cylinder pattern overlay (5% opacity)
+GatewayNode.tsx
+typescript
+1234567
+// Extends BaseNode structure
+// Icon: Phosphor Shield or Gate
+// Additional properties:
+//   - Type: "API Gateway" / "Load Balancer"
+//   - Rules: "12 routes" count
+//   - Rate limit: "1000 req/min" badge
+// Visual: subtle shield pattern or arrow flow animation (CSS)
+7. Chat Components
+ChatMessage.tsx
+typescript
+12345678910111213
+// Props: { role: 'user' | 'assistant', content: string, timestamp: Date, suggestions?: Suggestion[] }
+// User message:
+//   - bg-gradient-orange, text-white, rounded-lg rounded-tr-none
+//   - font-display, text-sm, leading-relaxed
+//   - Right-aligned, max-w-[85%], ml-auto
+//   - Code blocks: font-mono, bg-black/30, rounded, p-2
+// AI message:
+//   - bg-background, border border-border-dark, rounded-lg rounded-tl-none
+//   - font-display for prose, font-mono for code
+//   - Left-aligned, max-w-
+ChatInput.tsx
+typescript
+1234567891011121314
+// Textarea: 
+//   - bg-background, border border-border-dark, rounded-lg
+//   - font-mono, text-sm, text-foreground, placeholder:text-muted
+//   - focus:ring-1 ring-orange-400, focus:border-orange-400
+//   - auto-resize via useTextareaResize hook
+// Character count: optional, text-xs text-muted, bottom-right
+// Attachment indicator: Phosphor CheckCircle (green) when file/URL attached
+// Send button: 
+//   - Phosphor PaperPlaneRight, bg-gradient-orange, rounded-lg
+//   - hover:opacity-90, disabl
+SuggestionCard.tsx
+typescript
+123456789101112
+// Container: border border-border-dark, rounded-lg, p-4, mt-2, bg-background
+// Title: font-display, text-foreground, font-medium, mb-2
+// Severity badge: 
+//   - High: bg-red-500/20 text-red-400 border border-red-500/30
+//   - Medium: bg-orange-500/20 text-orange-400 border border-orange-500/30  
+//   - Low: bg-green-500/20 text-green-400 border border-green-500/30
+// Diagram preview: mini canvas thumbnail (120x80px), border border-border-dark
+// Code diff preview: collapsible section, font-mo
+🎬 ANIMATIONS & INTERACTIONS (Framer Motion)
+Sidebar Transitions
+typescript
+123456
+Chat Message Entry
+typescript
+123456789
+Node Interactions
+typescript
+12345
+Gradient Button Hover
+typescript
+12
+Interactive States Summary
+All clickable elements: hover:bg-border-dark or hover:border-orange-400
+Active/dragging nodes: orange ring + elevated shadow
+Loading states: skeleton cards with orange gradient shimmer
+Toast notifications: slide-in from top-right, orange accent border
+Confirmation dialogs: backdrop blur, orange primary button
+🧠 STATE MANAGEMENT (Zustand)
+useCanvasStore.ts
+typescript
+1234567891011121314151617181920212223242526272829303132333435363738394041424344454647
+interface CanvasState {
+  // Graph data
+  nodes: Node[];
+  edges: Edge[];
+  
+  // Selection
+  selectedNodeIds: string[];
+  selectedEdgeIds: string[];
+  
+  // Viewport
+
+useChatStore.ts
+typescript
+1234567891011121314151617181920
+interface ChatState {
+  messages: ChatMessage[];
+  isLoading: boolean;
+  attachedFile: File | null;
+  attachedUrl: string | null;
+  
+  addMessage: (message: ChatMessage) => void;
+  clearHistory: () => void;
+  sendMessage: (content: string) => Promise<void>;
+  setAttachment: (file: File | null, url: string | null) => void;
+
+🎨 STYLING DETAILS
+globals.css
+css
+1234567891011121314151617181920212223242526272829303132333435363738394041424344454647484950515253545556575859606162
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ffffff;
+    --card-bg: #171717;
+    --border-dark: #262626;
+
+Gradient Utility Class
+css
+1234567
+/* Add to globals.css or use Tailwind arbitrary values */
+.gradient-orange {
+  @apply bg-gradient-to-r from-orange-400 to-orange-500;
+}
+.gradient-orange-text {
+  @apply bg-gradient-to-r from-orange-400 to-orange-500 bg-clip-text text-transparent;
+}
+⌨️ KEYBOARD SHORTCUTS
+typescript
+123456789101112131415161718
+// lib/constants/keyboard-shortcuts.ts
+export const KEYBOARD_SHORTCUTS = {
+  'Delete|Backspace': { action: 'delete-selected', description: 'Remove selected nodes/edges' },
+  'Mod+C': { action: 'copy', description: 'Copy selected nodes' },
+  'Mod+V': { action: 'paste', description: 'Paste copied nodes' },
+  'Mod+D': { action: 'duplicate', description: 'Duplicate selected' },
+  'Mod+Z': { action: 'undo', description: 'Undo last action' },
+  'Mod+Shift+Z': { action: 'redo', description: 'Redo' },
+ 
+✅ IMPLEMENTATION CHECKLIST
+Phase 1: Foundation
+Initialize Next.js 14 + TypeScript + Tailwind
+Install dependencies: reactflow, framer-motion, zustand, @phosphor-icons/react
+Configure fonts: Dynapuff (display), DM Mono (code) via next/font
+Set up tailwind.config.js with dark theme colors + orange gradient
+Implement dot background pattern in globals.css
+Create folder structure as specified
+Phase 2: Layout Shell
+Build CanvasLayout.tsx (3-panel flex container)
+Implement TopToolbar.tsx with gradient buttons + Phosphor icons
+Build LeftSidebar.tsx with collapsible state + component categories
+Build RightSidebar.tsx with chat UI structure
+Add ResizeHandle.tsx for draggable panel borders
+Persist sidebar collapse state to localStorage
+Phase 3: Canvas Core
+Set up React Flow Provider with dark theme overrides
+Create BaseNode.tsx with orange-accented styling
+Implement ServiceNode, DatabaseNode, GatewayNode variants
+Create DefaultEdge.tsx with muted stroke + orange selection
+Add sample architecture nodes on first load
+Implement keyboard shortcuts via useEffect listener
+Phase 4: Component Library
+Build ComponentLibrary.tsx with Phosphor icons
+Implement drag-and-drop from sidebar to canvas (@dnd-kit or HTML5)
+Add search/filter functionality for components
+Create collapsible category sections with animations
+Phase 5: Chat Panel
+Build ChatPanel.tsx with scrollable message history
+Implement ChatMessage.tsx with user/AI styling + markdown support
+Create ChatInput.tsx with auto-resize + attachment handling
+Build SuggestionCard.tsx with diagram/code preview
+Add quick prompt chips with horizontal scroll
+Connect to mock AI API endpoint (placeholder for backend)
+Phase 6: State & Persistence
+Set up Zustand stores (canvas + chat) with TypeScript
+Implement localStorage persistence with partialize
+Add undo/redo history tracking
+Connect save/load diagram functionality
+Phase 7: Polish & QA
+Add Framer Motion animations (sidebar, messages, nodes)
+Implement all hover/active/focus states with orange accents
+Add toast notifications (sonner or react-hot-toast)
+Test responsive behavior (min 1280px width)
+Performance: memoize heavy components, virtualize long lists
+Accessibility: keyboard nav, ARIA labels, contrast checks
+Lighthouse audit target: >90 performance, >95 accessibility
+📦 REQUIRED DEPENDENCIES
+json
+12345678910111213141516171819202122232425262728293031
+{
+  "dependencies": {
+    "next": "14.2.3",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "reactflow": "^11.11.3",
+    "framer-motion": "^11.1.7",
+    "zustand": "^4.5.2",
+    "@phosphor-icons/react": "^2.1.7",
+    "@radix-ui/react-dialog": "^1.0.5",
+
+🎯 QUALITY REQUIREMENTS
+Performance: Canvas handles 100+ nodes at 60fps; memoize node renders
+Accessibility: WCAG 2.1 AA (contrast ratio 4.5:1 for text, keyboard nav, ARIA)
+Responsiveness: Desktop-first, min 1280px width; graceful degradation to 1024px
+Browser Support: Chrome, Firefox, Safari, Edge (last 2 versions)
+Code Quality: TypeScript strict mode, ESLint + Prettier, no any types
+Testing: Unit tests for utils/hooks; integration tests for canvas interactions
+🚀 STARTING INSTRUCTIONS
+Install dependencies from package list above
+Configure fonts in app/layout.tsx (Dynapuff + DM Mono via next/font)
+Update tailwind.config.js with dark theme colors + orange gradient
+Implement dot background in globals.css and verify visual subtlety
+Build CanvasLayout.tsx shell (3-panel flex) with collapsible sidebars
+Integrate React Flow in CanvasArea.tsx with dark theme overrides
+Build LeftSidebar component library with Phosphor icons + drag-and-drop
+Build RightSidebar chat UI with message history + input
+Connect Zustand stores for canvas + chat state management
+Add Framer Motion animations and interactive states
+Test thoroughly, optimize performance, then deploy
