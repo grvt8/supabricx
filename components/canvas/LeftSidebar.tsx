@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useState } from "react";
 import { 
   CaretLeft, 
@@ -65,9 +66,9 @@ export default function LeftSidebar({ isOpen, toggle, width = 280 }: SidebarProp
       label: "Data & Storage",
       icon: <Database size={20} />,
       items: [
-        { label: "Relational DB", icon: <Database size={16} /> },
+        { label: "Relational DB", icon: <Image src="/postgresql.png" alt="PostgreSQL" width={16} height={16} /> },
         { label: "NoSQL DB", icon: <Files size={16} /> },
-        { label: "Cache", icon: <Lightning size={16} /> },
+        { label: "Cache", icon: <Image src="/redis.png" alt="Redis" width={16} height={16} /> },
         { label: "Object Storage", icon: <HardDrives size={16} /> },
         { label: "Data Warehouse", icon: <Warehouse size={16} /> },
         { label: "Search Engine", icon: <MagnifyingGlass size={16} /> },
@@ -136,7 +137,7 @@ export default function LeftSidebar({ isOpen, toggle, width = 280 }: SidebarProp
       className="flex h-full flex-col border-r border-border-dark bg-card-bg transition-all overflow-hidden z-40 relative"
     >
       {/* Header */}
-      <div className="flex h-14 items-center justify-between px-4 border-b border-border-dark shrink-0">
+      <div className="flex h-14 items-center justify-between px-4 shrink-0">
         <AnimatePresence mode="wait">
           {isOpen && (
             <motion.span
@@ -164,7 +165,7 @@ export default function LeftSidebar({ isOpen, toggle, width = 280 }: SidebarProp
           <input
             type="text"
             placeholder="Search components..."
-            className="w-full bg-background border border-border-dark rounded-md py-1.5 pl-9 pr-3 text-sm text-foreground placeholder:text-muted focus:outline-none focus:border-orange-400 transition-colors"
+            className="w-full bg-background rounded-md py-1.5 pl-9 pr-3 text-sm text-foreground placeholder:text-muted focus:outline-none focus:border-orange-400 transition-colors"
           />
         </div>
       </div>
@@ -172,7 +173,7 @@ export default function LeftSidebar({ isOpen, toggle, width = 280 }: SidebarProp
       {/* Categories */}
       <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-border-dark scrollbar-track-transparent">
         {categories.map((category) => (
-          <div key={category.id} className="border-b border-border-dark/50">
+          <div key={category.id} className="">
             <button
               onClick={() => setActiveCategory(activeCategory === category.id ? null : category.id)}
               className={`flex w-full items-center justify-between px-4 py-3 hover:bg-border-dark/50 transition-colors ${
