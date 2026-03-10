@@ -30,7 +30,7 @@ export default function CanvasLayout() {
   }, [rightSidebarOpen]);
 
   return (
-    <div className="flex h-screen w-screen flex-col overflow-hidden bg-background text-foreground">
+    <div className="flex h-screen w-screen flex-col overflow-hidden bg-[var(--color-background)] text-foreground">
       <TopToolbar />
       <div className="flex flex-1 overflow-hidden relative">
         <LeftSidebar 
@@ -39,14 +39,8 @@ export default function CanvasLayout() {
           width={leftWidth}
         />
         
-        {/* Resize Handle Left */}
-        {/* TODO: Implement drag to resize */}
-        
         <CanvasArea />
         
-        {/* Resize Handle Right */}
-        {/* TODO: Implement drag to resize */}
-
         <RightSidebar 
           isOpen={rightSidebarOpen} 
           toggle={() => setRightSidebarOpen(!rightSidebarOpen)}
@@ -56,7 +50,7 @@ export default function CanvasLayout() {
         {!rightSidebarOpen && (
           <button 
             onClick={() => setRightSidebarOpen(true)}
-            className="absolute right-4 top-4 z-50 p-2 bg-card-bg border border-border-dark rounded-full text-foreground shadow-lg hover:text-orange-400 transition-colors"
+            className="absolute right-4 top-4 z-50 p-2 bg-card-bg rounded-full text-foreground shadow-lg hover:text-orange-400 transition-colors"
           >
             <CaretLeft size={20} />
           </button>

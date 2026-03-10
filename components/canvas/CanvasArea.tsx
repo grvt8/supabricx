@@ -132,7 +132,7 @@ export default function CanvasArea() {
   }), []);
 
   return (
-    <div className="flex-1 h-full w-full bg-background bg-dot-pattern relative">
+    <div className="flex-1 h-full w-full bg-[var(--color-background)] relative">
       <ReactFlow
         nodes={nodes}
         edges={edges}
@@ -151,7 +151,7 @@ export default function CanvasArea() {
             animated: true,
         }}
       >
-        <Background color="transparent" />
+        <Background color="#a3a3a3" gap={20} size={1} />
         <Controls className="!bg-card-bg !border-border-dark !text-muted [&>button]:!border-border-dark [&>button:hover]:!bg-border-dark [&>button:hover]:!text-foreground" />
       </ReactFlow>
     </div>

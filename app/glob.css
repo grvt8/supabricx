@@ -1,0 +1,216 @@
+
+@import "tailwindcss";
+
+@theme {
+  --color-background: #ffe9cf;
+  --color-foreground: #ffffff;
+  --color-card-bg: #171717;
+  --color-border-dark: #262626;
+  --color-muted: #a3a3a3;
+  --color-mainColor: #FFB563;
+  --color-subColor: #F85E00;
+  
+  --font-dynapuff: var(--font-dynapuff), sans-serif;
+  --font-dm-mono: var(--font-dm-mono), monospace;
+}
+
+/* Typography Defaults */
+h1, h2, h3, h4, h5, h6, .font-dynapuff {
+  font-family: var(--font-dynapuff);
+}
+
+body, p, span, div, a, button, input, textarea, .font-dm-mono {
+  font-family: var(--font-dm-mono);
+}
+
+/* Custom Utilities */
+.gradient-orange {
+  background-image: linear-gradient(to right, var(--color-orange-400), var(--color-orange-500));
+}
+
+.gradient-orange-text {
+  background-image: linear-gradient(to right, var(--color-orange-400), var(--color-orange-500));
+  background-clip: text;
+  color: transparent;
+}
+
+.bg-dot-pattern {
+  background-image: radial-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+  background-size: 32px 32px;
+}
+
+body{
+  background-color: #ffe9cf ;
+}
+
+/* Glassmorphic button gradients */
+button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 0.5px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 162, 56, 0.8) 20%,
+    rgb(255, 190, 61) 50%,
+    rgba(250, 144, 51, 0.2) 80%,
+    transparent 100%
+  );
+  box-shadow: 0 0 20px rgba(255, 152, 56, 0.5);
+}
+
+button::after {
+  content: '';
+  position: absolute;
+  top: 1px;
+  left: 10%;
+  right: 10%;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.3) 50%,
+    transparent 100%
+  );
+}
+
+/* Hover/Active States */
+button:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 162, 56, 0.3);
+  transform: translateY(-2px);
+  box-shadow:
+    0 12px 40px rgba(0, 0, 0, 0.4),
+    0 0 30px rgba(255, 116, 56, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15);
+}
+
+button:hover::before {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 162, 56, 0.8) 20%,
+    rgb(255, 190, 61) 50%,
+    rgba(250, 144, 51, 0.2) 80%,
+    transparent 100%
+  );
+  box-shadow: 0 0 20px rgba(255, 129, 56, 0.5);
+}
+
+button:active {
+  transform: translateY(0);
+  box-shadow:
+    0 4px 16px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.chat-send-button {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  padding: 0.6rem 1.6rem;
+  border: 1px solid rgba(197, 126, 34, 0.6);
+  background-image: linear-gradient(90deg, #c58422, #dea54a, #c58422);
+  color: #ecfdf5;
+  font-size: 0.9rem;
+  font-weight: 500;
+  box-shadow: 0 14px 40px rgba(197, 107, 34, 0.55);
+  cursor: pointer;
+  overflow: hidden;
+}
+
+.chat-send-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 0.5px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 162, 56, 0.8) 20%,
+    rgb(255, 190, 61) 50%,
+    rgba(250, 144, 51, 0.2) 80%,
+    transparent 100%
+  );
+  box-shadow: 0 0 22px rgba(197, 121, 34, 0.7);
+}
+
+.chat-send-button::after {
+  content: '';
+  position: absolute;
+  top: 1px;
+  left: 12%;
+  right: 12%;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.5) 50%,
+    transparent 100%
+  );
+}
+
+.chat-send-button:hover {
+  transform: translateY(-1px);
+  box-shadow:
+    0 16px 50px rgba(197, 129, 34, 0.7),
+    inset 0 1px 0 rgba(255, 255, 255, 0.25);
+  border: 1px solid rgba(197, 126, 34, 0.6);
+  background-image: linear-gradient(90deg, #c58422, #dea54a, #c58422);
+}
+
+.agentic-toggle {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  padding: 0.55rem 1.1rem;
+  border: 1px solid rgba(39, 39, 42, 1);
+  background: radial-gradient(circle at top left, rgba(197, 99, 34, 0.15), transparent 40%),
+    rgba(15, 15, 15, 0.98);
+  color: #e5e5e5;
+  font-size: 0.8rem;
+}
+
+.agentic-toggle:hover {
+  border-color: rgba(63, 63, 70, 1);
+  background: radial-gradient(circle at top left, rgba(197, 116, 34, 0.25), transparent 45%),
+    rgba(15, 15, 15, 1);
+}
+
+.cook-button {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  padding: 0.65rem 1.4rem;
+  border: 1px solid #ff440041;
+  background-image: linear-gradient(50deg, #d76412, #ff7700);
+  color: #fdfdfd;
+  font-size: 0.86rem;
+  font-weight: 500;
+  box-shadow:
+    0 14px 36px rgba(161, 80, 45, 0.7),
+    0 0 14px rgb(163, 76, 22);
+}
+
+.cook-button:hover {
+  border: 1px solid rgba(197, 126, 34, 0.6);
+  background-image: linear-gradient(90deg, #e35315, #c55622);;
+  transform: translateY(-1px);
+}
