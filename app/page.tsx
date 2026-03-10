@@ -4,22 +4,24 @@ import Navbar from "./components/Navbar";
 import Features from "@/components/landing/Features";
 import Pricing from "@/components/landing/Pricing";
 import Footer from "@/components/Footer";
+import Button from "./components/Button";
+import { ArrowUpRight } from "@phosphor-icons/react";
+import { useRouter } from "next/navigation";
+import BentoGrid from "@/components/landing/BentoGrid";
+
 
 export default function Home() {
+  const router = useRouter();
   return (
-    <div className="min-h-screen bg-[#ffe9cf] text-white">
+    <div className="min-h-screen bg-[#ffe9cf] text-black">
       <Navbar />
       <main className="flex-1 flex-col">
         <div className="mx-auto flex max-w-6xl flex-col items-center justify-center px-4 pb-12 pt-10 md:pb-24 md:pt-16">
-          <section className="relative w-full rounded-2xl md:rounded-[32px] border border-white/5 bg-gradient-to-b from-[#050608] via-[#050b08] to-black px-4 py-10 md:px-6 md:py-16 shadow-[0_24px_80px_rgba(0,0,0,0.8)]">
-            <span className="pointer-events-none absolute left-0 top-0 h-7 w-7 border-l border-t border-orange-400/60" />
-            <span className="pointer-events-none absolute right-0 top-0 h-7 w-7 border-r border-t border-orange-400/60" />
-            <span className="pointer-events-none absolute bottom-0 left-0 h-7 w-7 border-b border-l border-orange-400/40" />
-            <span className="pointer-events-none absolute bottom-0 right-0 h-7 w-7 border-b border-r border-orange-400/40" />
-
+          <section className="relative w-full rounded-2xl md:rounded-[32px] py-10 md:px-6 md:py-16">
+          
             <div className="flex flex-col items-center gap-8 md:gap-10">
               <div className="flex flex-col items-center gap-4 text-center">
-                <span className="rounded-full border px-4 py-1 text-xs font-medium tracking-wide text-orange-300">
+                <span className="rounded-full border px-4 py-1 text-xs font-medium tracking-wide">
                   Build systems brick by brick at supa speed
                 </span>
                 <div className="space-y-3">
@@ -32,6 +34,13 @@ export default function Home() {
                   <p className="max-w-2xl text-sm text-zinc-400 md:text-base">
                     Design, validate, and deploy resilient systems with AI-guided architecture. 
                   </p>
+                  <Button
+                    title="Design Now"
+                    Icon={ArrowUpRight}
+                    width="220px"
+                    height="h-11"
+                    onClick={() => router.push('/signup')}
+                  />
                 </div>
               </div>
 
@@ -39,6 +48,10 @@ export default function Home() {
             </div>
           </section>
         </div>
+
+        <div className="bg-[#050608] w-full border-t border-white/5">
+          <BentoGrid />
+        </div>  
 
         {/* Features Section */}
         <div className="bg-[#050608] w-full border-t border-white/5">

@@ -1,6 +1,6 @@
 "use client";
 
-import { Check } from "@phosphor-icons/react";
+import { Check, Sparkle } from "@phosphor-icons/react";
 
 interface PricingPlan {
   name: string;
@@ -60,8 +60,8 @@ export default function Pricing() {
       <div className="absolute inset-0 bg-gradient-to-b from-transparent via-orange-950/5 to-transparent pointer-events-none" />
 
       <div className="text-center mb-16 relative z-10">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-sm font-medium text-zinc-300 mb-6 backdrop-blur-sm">
-          <span className="h-1.5 w-1.5 rounded-full bg-orange-500 animate-pulse" />
+        <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/5 border border-white/10 text-sm font-medium text-zinc-300 mb-6 backdrop-blur-sm">
+          <span className="h-1.5 w-1.5 bg-orange-500 animate-pulse" />
           Pricing
         </div>
         
@@ -79,46 +79,47 @@ export default function Pricing() {
           <div 
             key={plan.name}
             className={`
-              relative p-8 rounded-3xl border transition-all duration-300 group
+              relative p-8 border transition-all duration-300 group flex flex-col items-center
               ${plan.popular 
-                ? "bg-white/5 border-orange-500/50 shadow-lg shadow-orange-500/10 scale-105 md:scale-110 z-20" 
-                : "bg-[#050608] border-white/10 hover:border-white/20 hover:bg-white/[0.02]"
+                ? "bg-[#09090b] border-zinc-800 rounded-[32px] scale-105 z-20 shadow-2xl shadow-purple-500/5" 
+                : "bg-[#050608] border-white/10 rounded-3xl hover:border-white/20 hover:bg-white/[0.02]"
               }
             `}
           >
             {plan.popular && (
-              <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full bg-gradient-to-r from-orange-500 to-orange-600 text-white text-xs font-bold uppercase tracking-wider shadow-lg shadow-orange-500/20">
+              <div className="absolute top-6 right-6 px-3 py-1 rounded-full border border-[#F85E00] bg-[#FFB563] text-[#F85E00] text-xs font-medium flex items-center gap-1.5">
+                <Sparkle weight="fill" />
                 Popular
               </div>
             )}
 
-            <div className="text-center mb-8">
-              <h3 className="text-2xl font-display font-bold text-white mb-2">{plan.name}</h3>
-              <p className="text-zinc-500 text-sm mb-6 h-10">{plan.description}</p>
+            <div className="text-center mb-8 w-full mt-8">
+              <h3 className="text-4xl font-display font-bold text-white mb-4">{plan.name}</h3>
+              <p className="text-zinc-500 text-sm mb-6">{plan.description}</p>
               
               <div className="flex items-end justify-center gap-1">
-                <span className="text-4xl font-bold text-white">{plan.price}</span>
-                <span className="text-zinc-500 text-lg mb-1">{plan.period}</span>
+                <span className="text-5xl font-bold text-white tracking-tight">{plan.price}</span>
+                <span className="text-zinc-500 text-lg mb-1.5">{plan.period}</span>
               </div>
             </div>
 
-            <ul className="space-y-4 mb-8">
+            <ul className="space-y-4 mb-10 w-full pl-4">
               {plan.features.map((feature) => (
-                <li key={feature} className="flex items-start gap-3 text-sm text-zinc-300">
-                  <Check size={16} weight="bold" className="text-white mt-0.5 shrink-0" />
+                <li key={feature} className="flex items-center gap-3 text-sm text-zinc-300">
+                  <Check size={16} weight="bold" className="text-white shrink-0" />
                   <span className="leading-snug">{feature}</span>
                 </li>
               ))}
             </ul>
 
             <button className={`
-              w-full py-3 rounded-xl font-medium transition-all duration-200
+              w-full py-3.5 font-medium transition-all duration-200 mt-auto
               ${plan.popular 
-                ? "bg-white text-black hover:bg-zinc-200 hover:shadow-lg hover:shadow-white/10" 
-                : "bg-white/10 text-white hover:bg-white/20 hover:shadow-lg hover:shadow-white/5"
+                ? "bg-white text-black rounded-full hover:bg-zinc-200 hover:shadow-lg hover:shadow-white/10" 
+                : "bg-white/10 text-white rounded-xl hover:bg-white/20 hover:shadow-lg hover:shadow-white/5"
               }
             `}>
-              Get Started
+              Get started
             </button>
           </div>
         ))}
