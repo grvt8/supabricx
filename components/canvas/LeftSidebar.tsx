@@ -47,6 +47,14 @@ interface SidebarProps {
 
 export default function LeftSidebar({ isOpen, toggle, width = 280 }: SidebarProps) {
   const [activeCategory, setActiveCategory] = useState<string | null>("compute");
+  const iconBg = (hex: string, alpha: number) => {
+    const normalized = hex.replace("#", "");
+    const full = normalized.length === 3 ? normalized.split("").map((c) => c + c).join("") : normalized;
+    const r = Number.parseInt(full.slice(0, 2), 16);
+    const g = Number.parseInt(full.slice(2, 4), 16);
+    const b = Number.parseInt(full.slice(4, 6), 16);
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+  };
 
   const categories = [
     {
@@ -54,12 +62,12 @@ export default function LeftSidebar({ isOpen, toggle, width = 280 }: SidebarProp
       label: "Compute & Logic",
       icon: <Cpu size={25} weight="fill" color="#FF2F9F" />,
       items: [
-        { label: "Load Balancer", icon: <Scales size={20} color="#FF2F9F" /> },
-        { label: "API Gateway", icon: <Shield size={20} color="#FF2F9F" /> },
-        { label: "Microservice", icon: <Cube size={20} color="#FF2F9F"/> },
-        { label: "Serverless Function", icon: <Lightning size={20} color="#FF2F9F" /> },
-        { label: "Monolith App", icon: <Browsers size={20} color="#FF2F9F" /> },
-        { label: "Scheduler/Worker", icon: <Clock size={20} color="#FF2F9F" /> },
+        { label: "Load Balancer", icon: <Scales size={20} color="#FF2F9F" />, color: "#FF2F9F" },
+        { label: "API Gateway", icon: <Shield size={20} color="#FF2F9F" />, color: "#FF2F9F" },
+        { label: "Microservice", icon: <Cube size={20} color="#FF2F9F"/>, color: "#FF2F9F" },
+        { label: "Serverless Function", icon: <Lightning size={20} color="#FF2F9F" />, color: "#FF2F9F" },
+        { label: "Monolith App", icon: <Browsers size={20} color="#FF2F9F" />, color: "#FF2F9F" },
+        { label: "Scheduler/Worker", icon: <Clock size={20} color="#FF2F9F" />, color: "#FF2F9F" },
       ]
     },
     {
@@ -67,12 +75,12 @@ export default function LeftSidebar({ isOpen, toggle, width = 280 }: SidebarProp
       label: "Data & Storage",
       icon: <Database size={25} weight="fill" color="#2FC1FF"/>,
       items: [
-        { label: "Relational DB", icon: <Image src="/postgresql.png" alt="PostgreSQL" width={16} height={16} /> },
-        { label: "NoSQL DB", icon: <Files size={20} color="#2FC1FF"/> },
-        { label: "Cache", icon: <Image src="/redis.png" alt="Redis" width={16} height={16} /> },
-        { label: "Object Storage", icon: <HardDrives size={20} color="#2FC1FF" /> },
-        { label: "Data Warehouse", icon: <Warehouse size={20} color="#2FC1FF" /> },
-        { label: "Search Engine", icon: <MagnifyingGlass size={20} color="#2FC1FF" /> },
+        { label: "Relational DB", icon: <Image src="/postgresql.png" alt="PostgreSQL" width={16} height={16} />, color: "#2FC1FF" },
+        { label: "NoSQL DB", icon: <Files size={20} color="#2FC1FF"/>, color: "#2FC1FF" },
+        { label: "Cache", icon: <Image src="/redis.png" alt="Redis" width={16} height={16} />, color: "#2FC1FF" },
+        { label: "Object Storage", icon: <HardDrives size={20} color="#2FC1FF" />, color: "#2FC1FF" },
+        { label: "Data Warehouse", icon: <Warehouse size={20} color="#2FC1FF" />, color: "#2FC1FF" },
+        { label: "Search Engine", icon: <MagnifyingGlass size={20} color="#2FC1FF" />, color: "#2FC1FF" },
       ]
     },
     {
@@ -80,10 +88,10 @@ export default function LeftSidebar({ isOpen, toggle, width = 280 }: SidebarProp
       label: "Messaging & Streaming",
       icon: <Broadcast size={25} weight="fill" color="#BF34D6"/>,
       items: [
-        { label: "Message Queue", icon: <Queue size={20} color="#BF34D6"/> },
-        { label: "Pub/Sub Topic", icon: <Broadcast size={20} color="#BF34D6"/> },
-        { label: "Event Stream", icon: <Waves size={20} color="#BF34D6"/> },
-        { label: "Email Service", icon: <Envelope size={20} color="#BF34D6"/> },
+        { label: "Message Queue", icon: <Queue size={20} color="#BF34D6"/>, color: "#BF34D6" },
+        { label: "Pub/Sub Topic", icon: <Broadcast size={20} color="#BF34D6"/>, color: "#BF34D6" },
+        { label: "Event Stream", icon: <Waves size={20} color="#BF34D6"/>, color: "#BF34D6" },
+        { label: "Email Service", icon: <Envelope size={20} color="#BF34D6"/>, color: "#BF34D6" },
       ]
     },
     {
@@ -91,11 +99,11 @@ export default function LeftSidebar({ isOpen, toggle, width = 280 }: SidebarProp
       label: "Network & Edge",
       icon: <Globe size={25} weight="fill" color="#28F0CC"/>,
       items: [
-        { label: "VPC / Network", icon: <Globe size={20} color="#28F0CC"/> },
-        { label: "Subnet", icon: <TreeStructure size={20} color="#28F0CC"/> },
-        { label: "CDN", icon: <Cloud size={20} color="#28F0CC"/> },
-        { label: "DNS / Domain", icon: <Globe size={20} color="#28F0CC"/> },
-        { label: "NAT Gateway", icon: <ArrowsLeftRight size={20} color="#28F0CC"/> },
+        { label: "VPC / Network", icon: <Globe size={20} color="#28F0CC"/>, color: "#28F0CC" },
+        { label: "Subnet", icon: <TreeStructure size={20} color="#28F0CC"/>, color: "#28F0CC" },
+        { label: "CDN", icon: <Cloud size={20} color="#28F0CC"/>, color: "#28F0CC" },
+        { label: "DNS / Domain", icon: <Globe size={20} color="#28F0CC"/>, color: "#28F0CC" },
+        { label: "NAT Gateway", icon: <ArrowsLeftRight size={20} color="#28F0CC"/>, color: "#28F0CC" },
       ]
     },
     {
@@ -103,10 +111,10 @@ export default function LeftSidebar({ isOpen, toggle, width = 280 }: SidebarProp
       label: "Security & Identity",
       icon: <Shield size={25} weight="fill" color="#46E84C"/>,
       items: [
-        { label: "Identity Provider", icon: <IdentificationCard size={20} color="#46E84C"/> },
-        { label: "Secrets Manager", icon: <Key size={20} color="#46E84C"/> },
-        { label: "WAF", icon: <Wall size={20} color="#46E84C"/> },
-        { label: "Certificate / SSL", icon: <Certificate size={20} color="#46E84C"/> },
+        { label: "Identity Provider", icon: <IdentificationCard size={20} color="#46E84C"/>, color: "#46E84C" },
+        { label: "Secrets Manager", icon: <Key size={20} color="#46E84C"/>, color: "#46E84C" },
+        { label: "WAF", icon: <Wall size={20} color="#46E84C"/>, color: "#46E84C" },
+        { label: "Certificate / SSL", icon: <Certificate size={20} color="#46E84C"/>, color: "#46E84C" },
       ]
     },
     {
@@ -114,9 +122,9 @@ export default function LeftSidebar({ isOpen, toggle, width = 280 }: SidebarProp
       label: "Observability",
       icon: <ChartLine size={25} weight="fill" color="#FF802F"/>,
       items: [
-        { label: "Logging Service", icon: <Scroll size={20} color="#FF802F"/> },
-        { label: "Metrics / Monitoring", icon: <ChartLine size={20} color="#FF802F"/> },
-        { label: "Tracing", icon: <Binoculars size={20} color="#FF802F"/> },
+        { label: "Logging Service", icon: <Scroll size={20} color="#FF802F"/>, color: "#FF802F" },
+        { label: "Metrics / Monitoring", icon: <ChartLine size={20} color="#FF802F"/>, color: "#FF802F" },
+        { label: "Tracing", icon: <Binoculars size={20} color="#FF802F"/>, color: "#FF802F" },
       ]
     },
     {
@@ -124,8 +132,8 @@ export default function LeftSidebar({ isOpen, toggle, width = 280 }: SidebarProp
       label: "External & Users",
       icon: <User size={25} weight="fill" color="#FF2F5B"/>,
       items: [
-        { label: "End User / Client", icon: <User size={20} color="#FF2F5B"/> },
-        { label: "3rd Party API", icon: <Plugs size={20} color="#FF2F5B"/> },
+        { label: "End User / Client", icon: <User size={20} color="#FF2F5B"/>, color: "#FF2F5B" },
+        { label: "3rd Party API", icon: <Plugs size={20} color="#FF2F5B"/>, color: "#FF2F5B" },
       ]
     }
   ];
@@ -217,9 +225,12 @@ export default function LeftSidebar({ isOpen, toggle, width = 280 }: SidebarProp
                           e.dataTransfer.effectAllowed = "move";
                         }}
                       >
-                        <span className="text-muted transition-colors">
+                        <div
+                          className="flex h-9 w-9 items-center justify-center rounded-lg"
+                          style={{ backgroundColor: iconBg(item.color, 0.2) }}
+                        >
                           {item.icon}
-                        </span>
+                        </div>
                         <span className="text-sm text-black/50 group-hover:text-foreground transition-colors">
                           {item.label}
                         </span>
