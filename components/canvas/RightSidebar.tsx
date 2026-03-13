@@ -4,12 +4,14 @@ import Image from "next/image";
 import { useState } from "react";
 import { 
   CaretRight, 
-  Trash, 
-  Gear, 
   PaperPlaneTilt,
   CheckCircle,
   ClockCounterClockwise,
-  Plus
+  Plus,
+  FileText,
+  GithubLogo,
+  File,
+  Chat
 } from "@phosphor-icons/react";
 import { motion } from "framer-motion";
 
@@ -39,10 +41,7 @@ export default function RightSidebar({ isOpen, toggle, width = 380 }: SidebarPro
             <CaretRight size={16} className={!isOpen ? "rotate-180" : ""} />
           </button>
           <div className="flex items-center gap-2">
-            <div className="w-10 h-10 rounded-full bg-orange-500/10 flex items-center justify-center">
-              <Image src="/logo.png" alt="Supabricx AI" className="w-full" width={16} height={16} />
-            </div>
-            <span className="font-display font-medium text-foreground">AI Assistant</span>
+            <span className="font-display font-medium text-black">Supabricx</span>
           </div>
         </div>
         <div className="flex items-center gap-1">
@@ -55,33 +54,88 @@ export default function RightSidebar({ isOpen, toggle, width = 380 }: SidebarPro
         </div>
       </div>
 
-      {/* Chat History */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4 scrollbar-thin scrollbar-thumb-border-dark scrollbar-track-transparent">
-        {/* Placeholder for chat messages */}
-        <div className="flex flex-col gap-2">
-          <div className="bg-subColor rounded-lg rounded-tl-none p-3 max-w-[90%] self-start">
-            <p className="text-sm text-foreground font-display">
-              Hello! I&apos;m Supabricx AI. How can I help you design your architecture today?
-            </p>
+      {/* Chat History / Empty State */}
+      <div className="flex-1 overflow-y-auto p-4 scrollbar-thin scrollbar-thumb-border-dark scrollbar-track-transparent">
+        {message.length === 0 ? (
+          <div className="flex flex-col items-center justify-center h-full gap-10">
+            <div className="flex flex-col items-center gap-4">
+              <div className="relative w-20 h-20 rounded-full bg-orange-500/10 flex items-center justify-center">
+                <Image src="/logo.png" alt="Supabricx AI" fill className="object-contain" />
+              </div>
+              <div className="text-center">
+                <div className="text-xl font-display font-medium text-black">
+                  Work with <span className="text-subColor">Supabricx</span>
+                </div>
+                <p className="mt-2 text-sm text-black/60 font-mono max-w-[320px]">
+                  Generate architecture diagrams, refine system designs, and turn requirements into deployable blueprints.
+                </p>
+              </div>
+            </div>
+            
+            <div className="w-full max-w-[340px]">
+              <div className="text-sm font-dm-mono font-medium text-black/70 mb-3">
+                Past Conversations
+              </div>
+
+              <div className="flex flex-col gap-2">
+                {[
+                  { title: "Generate a SaaS microservices architecture", meta: "Today" },
+                  
+                ].map((item) => (
+                  <button
+                    key={item.title}
+                    className="w-full flex items-center justify-between gap-3 rounded-xl bg-canvas-bg hover:bg-border-dark transition-colors px-4 py-3"
+                  >
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="h-8 w-8 rounded-lg bg-subColor/20 flex items-center justify-center shrink-0">
+                        <Chat size={16} className="text-subColor" weight="fill" />
+                      </div>
+                      <span className="text-sm text-black/70 truncate font-display">
+                        {item.title}
+                      </span>
+                    </div>
+                    <span className="text-xs text-black/40 shrink-0 font-mono">
+                      {item.meta}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
-        </div>
+        ) : (
+          <div className="flex flex-col gap-2">
+             {/* Chat messages would go here */}
+          </div>
+        )}
       </div>
 
       {/* Chat Input */}
       <div className="p-4">
-        <div className="relative">
+        <div className="relative bg-canvas-bg rounded-2xl p-2">
           <textarea
             value={message}
             onChange={(e) => setMessage(e.target.value)}
             placeholder="Describe your architecture..."
-            className="w-full bg-canvas-bg rounded-lg p-3 pr-12 text-sm font-mono text-black placeholder:text-muted focus:outline-none focus:ring-1 focus:ring-orange-400 resize-none min-h-[80px]"
+            className="w-full bg-transparent pl-3 pr-12 text-sm font-mono text-black placeholder:text-muted focus:outline-none resize-none min-h-[40px]"
           />
-          <button
-            className="absolute bottom-3 right-3 p-2 bg-subColor rounded-md text-white hover:opacity-90 transition-opacity disabled:opacity-50"
-            disabled={!message.trim()}
-          >
-            <PaperPlaneTilt size={16} weight="bold" />
-          </button>
+          
+          <div className="flex items-center justify-between px-2 pb-1">
+             <div className="flex items-center gap-2">
+               <button className="p-1.5 hover:bg-black/5 rounded-lg text-muted hover:text-foreground transition-colors">
+                 <FileText size={18} />
+               </button>
+               <button className="p-1.5 hover:bg-black/5 rounded-lg text-muted hover:text-foreground transition-colors">
+                 <GithubLogo size={18} />
+               </button>
+             </div>
+
+             <button
+               className="p-2 bg-subColor rounded-xl text-white hover:opacity-90 transition-opacity disabled:opacity-50"
+               disabled={!message.trim()}
+             >
+               <PaperPlaneTilt size={16} weight="bold" />
+             </button>
+          </div>
         </div>
         <div className="flex justify-between items-center mt-2 px-1">
           <span className="text-xs text-muted font-mono">{message.length} chars</span>
