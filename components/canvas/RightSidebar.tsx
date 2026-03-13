@@ -6,7 +6,7 @@ import {
   CaretRight, 
   Trash, 
   Gear, 
-  PaperPlaneRight,
+  PaperPlaneTilt,
   CheckCircle,
   ClockCounterClockwise,
   Plus
@@ -27,7 +27,7 @@ export default function RightSidebar({ isOpen, toggle, width = 380 }: SidebarPro
       initial={false}
       animate={{ width: isOpen ? width : 0 }}
       transition={{ duration: 0.3, ease: "easeInOut" }}
-      className="flex h-full flex-col border-l border-border-dark bg-card-bg overflow-hidden z-40 relative"
+      className="flex h-full flex-col bg-foreground overflow-hidden z-40 relative"
     >
       {/* Header */}
       <div className="flex h-14 items-center justify-between px-4 shrink-0">
@@ -39,8 +39,8 @@ export default function RightSidebar({ isOpen, toggle, width = 380 }: SidebarPro
             <CaretRight size={16} className={!isOpen ? "rotate-180" : ""} />
           </button>
           <div className="flex items-center gap-2">
-            <div className="w-6 h-6 rounded-full bg-orange-500/10 flex items-center justify-center">
-              <Image src="/logo.png" alt="Supabricx AI" width={16} height={16} />
+            <div className="w-10 h-10 rounded-full bg-orange-500/10 flex items-center justify-center">
+              <Image src="/logo.png" alt="Supabricx AI" className="w-full" width={16} height={16} />
             </div>
             <span className="font-display font-medium text-foreground">AI Assistant</span>
           </div>
@@ -59,7 +59,7 @@ export default function RightSidebar({ isOpen, toggle, width = 380 }: SidebarPro
       <div className="flex-1 overflow-y-auto p-4 space-y-4 scrollbar-thin scrollbar-thumb-border-dark scrollbar-track-transparent">
         {/* Placeholder for chat messages */}
         <div className="flex flex-col gap-2">
-          <div className="bg-background rounded-lg rounded-tl-none p-3 max-w-[90%] self-start">
+          <div className="bg-subColor rounded-lg rounded-tl-none p-3 max-w-[90%] self-start">
             <p className="text-sm text-foreground font-display">
               Hello! I&apos;m Supabricx AI. How can I help you design your architecture today?
             </p>
@@ -68,19 +68,19 @@ export default function RightSidebar({ isOpen, toggle, width = 380 }: SidebarPro
       </div>
 
       {/* Chat Input */}
-      <div className="p-4 bg-card-bg">
+      <div className="p-4">
         <div className="relative">
           <textarea
             value={message}
             onChange={(e) => setMessage(e.target.value)}
             placeholder="Describe your architecture..."
-            className="w-full bg-background rounded-lg p-3 pr-12 text-sm font-mono text-foreground placeholder:text-muted focus:outline-none focus:ring-1 focus:ring-orange-400 resize-none min-h-[80px]"
+            className="w-full bg-canvas-bg rounded-lg p-3 pr-12 text-sm font-mono text-black placeholder:text-muted focus:outline-none focus:ring-1 focus:ring-orange-400 resize-none min-h-[80px]"
           />
           <button
-            className="absolute bottom-3 right-3 p-2 bg-gradient-to-r from-orange-400 to-orange-500 rounded-md text-white hover:opacity-90 transition-opacity disabled:opacity-50"
+            className="absolute bottom-3 right-3 p-2 bg-subColor rounded-md text-white hover:opacity-90 transition-opacity disabled:opacity-50"
             disabled={!message.trim()}
           >
-            <PaperPlaneRight size={16} weight="bold" />
+            <PaperPlaneTilt size={16} weight="bold" />
           </button>
         </div>
         <div className="flex justify-between items-center mt-2 px-1">

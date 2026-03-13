@@ -17,7 +17,7 @@ const cardVariants = {
 
 export default function BentoGrid() {
   return (
-    <section className="w-full max-w-7xl mx-auto px-4 py-24">
+    <section className="w-full max-w-7xl mx-auto px-4 py-24 bg-[#EAE5D9]">
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         
         {/* CARD 1: AI Architecture Generation */}
@@ -27,33 +27,33 @@ export default function BentoGrid() {
           whileInView="visible"
           viewport={{ once: true }}
           variants={cardVariants}
-          className="relative bg-card-bg border border-border-dark rounded-2xl p-6 overflow-hidden group hover:border-orange-400/50 transition-colors duration-300 min-h-[400px]"
+          className="relative bg-[#EAE5D9] rounded-2xl p-6 overflow-hidden grou transition-colors duration-300 min-h-[400px]"
         >
           {/* Header */}
           <div className="flex items-center gap-3 mb-6">
             <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-orange-400 to-orange-500 flex items-center justify-center">
               <StarFourIcon weight="bold" size={20} className="text-white" />
             </div>
-            <h3 className="font-display text-xl font-semibold text-foreground">
+            <h3 className="font-display text-xl font-semibold text-black">
               AI Architecture Generation
             </h3>
           </div>
 
           {/* Description */}
-          <p className="font-mono text-sm text-muted mb-6">
+          <p className="font-mono text-sm text-black/60 mb-6">
             Describe your system in plain English. Watch AI build the architecture.
           </p>
 
           {/* Visual Demo: Chat Interface */}
-          <div className="bg-background rounded-lg border border-border-dark p-4 space-y-3">
+          <div className="bg-white rounded-lg border border-black/10 p-4 space-y-3">
             {/* User Message */}
             <div className="flex gap-3">
               <div className="w-8 h-8 rounded-full bg-orange-400/20 flex items-center justify-center flex-shrink-0">
                 <User size={16} className="text-orange-400" />
               </div>
-              <div className="bg-border-dark/50 rounded-lg rounded-tl-none p-3 max-w-[85%]">
-                <p className="font-mono text-xs text-foreground">
-                  "Create a microservices architecture for an e-commerce app with auth, products, and payments"
+              <div className="bg-black/5 rounded-lg rounded-tl-none p-3 max-w-[85%]">
+                <p className="font-mono text-xs text-black/80">
+                  &quot;Create a microservices architecture for an e-commerce app with auth, products, and payments&quot;
                 </p>
               </div>
             </div>
@@ -63,18 +63,18 @@ export default function BentoGrid() {
               <div className="w-8 h-8 rounded-full bg-gradient-to-br from-orange-400 to-orange-500 flex items-center justify-center flex-shrink-0">
                 <StarFourIcon size={16} className="text-white" />
               </div>
-              <div className="bg-background border border-border-dark rounded-lg rounded-tl-none p-3 max-w-[85%]">
-                <p className="font-mono text-xs text-foreground mb-2">
+              <div className="bg-white border border-black/10 rounded-lg rounded-tl-none p-3 max-w-[85%]">
+                <p className="font-mono text-xs text-black/80 mb-2">
                   ✓ Generated architecture:
                 </p>
                 <div className="flex gap-2 flex-wrap">
-                  <span className="px-2 py-1 bg-purple-400/20 border border-purple-400/30 rounded text-xs font-mono text-purple-300">
+                  <span className="px-2 py-1 bg-purple-400/20 border border-purple-400/30 rounded text-xs font-mono text-purple-600">
                     API Gateway
                   </span>
-                  <span className="px-2 py-1 bg-blue-400/20 border border-blue-400/30 rounded text-xs font-mono text-blue-300">
+                  <span className="px-2 py-1 bg-blue-400/20 border border-blue-400/30 rounded text-xs font-mono text-blue-600">
                     Auth Service
                   </span>
-                  <span className="px-2 py-1 bg-green-400/20 border border-green-400/30 rounded text-xs font-mono text-green-300">
+                  <span className="px-2 py-1 bg-green-400/20 border border-green-400/30 rounded text-xs font-mono text-green-600">
                     PostgreSQL
                   </span>
                 </div>
@@ -93,37 +93,37 @@ export default function BentoGrid() {
           whileInView="visible"
           viewport={{ once: true }}
           variants={cardVariants}
-          className="relative bg-card-bg border border-border-dark rounded-2xl p-6 overflow-hidden group hover:border-orange-400/50 transition-colors duration-300 min-h-[400px]"
+          className="relative bg-white border border-black/10 rounded-2xl p-6 overflow-hidden group hover:border-black/20 transition-colors duration-300 min-h-[400px]"
         >
           {/* Header */}
           <div className="flex items-center gap-3 mb-6">
             <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-purple-400 to-purple-500 flex items-center justify-center">
               <Code weight="bold" size={20} className="text-white" />
             </div>
-            <h3 className="font-display text-xl font-semibold text-foreground">
+            <h3 className="font-display text-xl font-semibold text-black">
               Code That Writes Itself
             </h3>
           </div>
 
           {/* Description */}
-          <p className="font-mono text-sm text-muted mb-6">
+          <p className="font-mono text-sm text-black/60 mb-6">
             Export your diagram to production-ready boilerplate code instantly.
           </p>
 
           {/* Visual Demo: Code Split View */}
-          <div className="bg-background rounded-lg border border-border-dark p-4 font-mono text-xs relative overflow-hidden">
-            <div className="flex items-center justify-between mb-2 border-b border-border-dark pb-2">
-              <span className="text-muted">docker-compose.yml</span>
+          <div className="bg-black rounded-lg border border-black/10 p-4 font-mono text-xs relative overflow-hidden text-zinc-300">
+            <div className="flex items-center justify-between mb-2 border-b border-white/10 pb-2">
+              <span className="text-zinc-400">docker-compose.yml</span>
               <div className="flex gap-1">
                 <div className="w-2 h-2 rounded-full bg-red-400/50" />
                 <div className="w-2 h-2 rounded-full bg-yellow-400/50" />
                 <div className="w-2 h-2 rounded-full bg-green-400/50" />
               </div>
             </div>
-            <div className="space-y-1 text-muted">
+            <div className="space-y-1 text-zinc-400">
               <div className="flex">
                 <span className="w-4 text-zinc-600">1</span>
-                <span className="text-purple-300">version:</span> <span className="text-green-300">'3.8'</span>
+                <span className="text-purple-300">version:</span> <span className="text-green-300">&apos;3.8&apos;</span>
               </div>
               <div className="flex">
                 <span className="w-4 text-zinc-600">2</span>
@@ -143,7 +143,7 @@ export default function BentoGrid() {
               </div>
               <div className="flex">
                 <span className="w-4 text-zinc-600">6</span>
-                <span className="pl-6 text-green-300">- "80:80"</span>
+                <span className="pl-6 text-green-300">- &quot;80:80&quot;</span>
               </div>
               <div className="flex">
                 <span className="w-4 text-zinc-600">7</span>
@@ -174,26 +174,26 @@ export default function BentoGrid() {
           whileInView="visible"
           viewport={{ once: true }}
           variants={cardVariants}
-          className="relative bg-card-bg border border-border-dark rounded-2xl p-6 overflow-hidden group hover:border-orange-400/50 transition-colors duration-300 min-h-[400px]"
+          className="relative bg-white border border-black/10 rounded-2xl p-6 overflow-hidden group hover:border-black/20 transition-colors duration-300 min-h-[400px]"
         >
           {/* Header */}
           <div className="flex items-center gap-3 mb-6">
             <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-400 to-blue-500 flex items-center justify-center">
               <GitBranch weight="bold" size={20} className="text-white" />
             </div>
-            <h3 className="font-display text-xl font-semibold text-foreground">
+            <h3 className="font-display text-xl font-semibold text-black">
               GitHub to Diagram
             </h3>
           </div>
 
           {/* Description */}
-          <p className="font-mono text-sm text-muted mb-6">
+          <p className="font-mono text-sm text-black/60 mb-6">
             Import any repository and instantly visualize its architecture and dependencies.
           </p>
 
           {/* Visual Demo: Import Flow */}
-          <div className="bg-background rounded-lg border border-border-dark p-4 flex flex-col items-center justify-center gap-4 h-[200px]">
-            <div className="flex items-center gap-2 px-4 py-2 bg-black/30 border border-white/10 rounded-full text-xs font-mono text-zinc-300">
+          <div className="bg-white rounded-lg border border-black/10 p-4 flex flex-col items-center justify-center gap-4 h-[200px]">
+            <div className="flex items-center gap-2 px-4 py-2 bg-black/5 border border-black/10 rounded-full text-xs font-mono text-black/70">
               <GithubLogo size={16} />
               <span>username/repo</span>
             </div>
@@ -202,12 +202,12 @@ export default function BentoGrid() {
               animate={{ y: [0, 5, 0] }}
               transition={{ repeat: Infinity, duration: 2 }}
             >
-              <ArrowRight size={24} className="text-muted rotate-90" />
+              <ArrowRight size={24} className="text-black/40 rotate-90" />
             </motion.div>
 
             <div className="relative">
               <div className="absolute inset-0 bg-blue-500/20 blur-xl rounded-full" />
-              <div className="relative bg-card-bg border border-blue-500/30 rounded-lg p-3 flex gap-2 shadow-xl">
+              <div className="relative bg-white border border-blue-500/30 rounded-lg p-3 flex gap-2 shadow-xl">
                 <div className="w-8 h-8 rounded bg-blue-500/20 border border-blue-500/30 flex items-center justify-center">
                   <div className="w-4 h-4 bg-blue-400 rounded-sm" />
                 </div>

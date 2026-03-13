@@ -13,7 +13,7 @@ import BentoGrid from "@/components/landing/BentoGrid";
 export default function Home() {
   const router = useRouter();
   return (
-    <div className="min-h-screen bg-[#ffe9cf] text-black">
+    <div className="min-h-screen bg-[#ffe9d0] text-black">
       <Navbar />
       <main className="flex-1 flex-col">
         <div className="mx-auto flex max-w-6xl flex-col items-center justify-center px-4 pb-12 pt-10 md:pb-24 md:pt-16">
@@ -49,7 +49,7 @@ export default function Home() {
           </section>
         </div>
 
-        <div className="bg-[#050608] w-full border-t border-white/5">
+        <div className="bg-[#050608] w-full">
           <BentoGrid />
         </div>  
 

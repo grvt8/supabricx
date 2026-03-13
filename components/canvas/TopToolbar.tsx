@@ -1,26 +1,35 @@
 "use client";
 
 import { useState } from "react";
-import { ArrowUUpLeft, ArrowUUpRight, Plus, Minus, DotsThreeVertical } from "@phosphor-icons/react";
+import Image from "next/image";
+import { 
+  ArrowUUpLeft, 
+  ArrowUUpRight, 
+  Plus, 
+  Minus, 
+  ClockCounterClockwise,
+  ChatText,
+  VideoCamera,
+  CaretDown,
+  Globe,
+  CloudCheckIcon
+} from "@phosphor-icons/react";
 
 export default function TopToolbar() {
   const [title, setTitle] = useState("Untitled Diagram");
   const [saveStatus] = useState<"saved" | "saving" | "unsaved">("saved");
 
   return (
-    <div className="flex h-14 w-full items-center justify-between border-b border-border-dark bg-card-bg/80 backdrop-blur-md px-4 z-50">
+    <div className="flex h-14 w-full items-center border-b border-canvas-border justify-between bg-foreground backdrop-blur-md px-4 z-50">
       {/* Left Section */}
       <div className="flex items-center gap-4">
-        <div className="font-display text-xl font-bold gradient-orange-text">
-          Supabricx
-        </div>
-        <div className="h-6 w-px bg-border-dark" />
+        <Image src="/logo.png" alt="Logo" className="h-10 w-10 md:h-14 md:w-14" width={100} height={10} />
         <div className="flex items-center gap-2">
           <input
             type="text"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            className="bg-transparent font-mono text-sm text-foreground focus:outline-none w-40"
+            className="bg-canvas-bg font-mono text-md text-black focus:outline-none w-40"
             placeholder="Untitled Diagram"
           />
           <div className={`h-2 w-2 rounded-full ${
@@ -30,30 +39,41 @@ export default function TopToolbar() {
         </div>
       </div>
 
-      {/* Center Section */}
-      <div className="flex items-center gap-2 rounded-lg bg-background p-1 border border-border-dark">
-        <button className="p-1.5 hover:bg-border-dark rounded text-muted hover:text-foreground transition-colors">
-          <ArrowUUpLeft size={16} />
-        </button>
-        <button className="p-1.5 hover:bg-border-dark rounded text-muted hover:text-foreground transition-colors">
-          <ArrowUUpRight size={16} />
-        </button>
-        <div className="h-4 w-px bg-border-dark mx-1" />
-        <button className="p-1.5 hover:bg-border-dark rounded text-muted hover:text-foreground transition-colors">
-          <Minus size={16} />
-        </button>
-        <span className="text-xs font-mono text-muted w-12 text-center">100%</span>
-        <button className="p-1.5 hover:bg-border-dark rounded text-muted hover:text-foreground transition-colors">
-          <Plus size={16} />
-        </button>
-      </div>
-
+      
       {/* Right Section */}
-      <div className="flex items-center gap-3">
-        {/* Placeholder for user/menu */}
-        <button className="p-2 hover:bg-border-dark rounded-full text-muted hover:text-foreground transition-colors">
-          <DotsThreeVertical size={20} weight="bold" />
+      <div className="flex items-center gap-4">
+        <button className="p-2 hover:bg-black/5 rounded-full text-gray-700 transition-colors">
+          <ClockCounterClockwise size={24} />
         </button>
+        
+        <button className="p-2 hover:bg-black/5 rounded-full text-gray-700 transition-colors">
+          <CloudCheckIcon size={24} />
+        </button>
+
+        {/* Share Button */}
+        <div className="flex items-center h-10 bg-mainColor hover:bg-subColor text-[#351300] rounded-full pl-4 pr-2 cursor-pointer transition-colors">
+          <div className="flex items-center gap-2 pr-3">
+            <Globe size={20} />
+            <span className="font-semibold text-sm">Share</span>
+          </div>
+          <div className="h-full w-px bg-subColor" />
+          <button className="pl-2 h-full flex items-center justify-center">
+            <CaretDown size={16} weight="bold" />
+          </button>
+        </div>
+
+        {/* User Profile */}
+        <div className="relative p-[2px] rounded-full bg-white">
+          <div className="absolute inset-0 rounded-full" style={{ background: "conic-gradient(#FFB563 0deg 90deg, #F85E00 90deg 270deg, #FBBC05 270deg 360deg)" }} />
+          <div className="relative h-10 w-10 rounded-full border-2 border-white bg-white overflow-hidden">
+             <Image 
+               src="/user.jpeg" 
+               alt="User" 
+               fill 
+               className="object-cover"
+             />
+          </div>
+        </div>
       </div>
     </div>
   );

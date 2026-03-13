@@ -132,7 +132,7 @@ export default function CanvasArea() {
   }), []);
 
   return (
-    <div className="flex-1 h-full w-full bg-[var(--color-background)] relative">
+    <div className="flex-1 h-full w-full bg-canvas-bg relative">
       <ReactFlow
         nodes={nodes}
         edges={edges}
