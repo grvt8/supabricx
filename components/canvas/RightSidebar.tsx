@@ -10,7 +10,6 @@ import {
   Plus,
   FileText,
   GithubLogo,
-  File,
   Chat
 } from "@phosphor-icons/react";
 import { motion } from "framer-motion";
@@ -84,11 +83,11 @@ export default function RightSidebar({ isOpen, toggle, width = 380 }: SidebarPro
                 ].map((item) => (
                   <button
                     key={item.title}
-                    className="w-full flex items-center justify-between gap-3 rounded-xl bg-canvas-bg hover:bg-border-dark transition-colors px-4 py-3"
+                    className="w-full flex items-center justify-between gap-3 rounded-xl bg-canvas-bg/70 hover:bg-canvas-bg transition-colors px-4 py-3"
                   >
                     <div className="flex items-center gap-3 min-w-0">
-                      <div className="h-8 w-8 rounded-lg bg-subColor/20 flex items-center justify-center shrink-0">
-                        <Chat size={16} className="text-subColor" weight="fill" />
+                      <div className="h-8 w-8 rounded-lg flex items-center justify-center shrink-0">
+                        <Chat size={20} className="text-subColor" weight="fill" />
                       </div>
                       <span className="text-sm text-black/70 truncate font-display">
                         {item.title}

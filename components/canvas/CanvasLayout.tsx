@@ -1,8 +1,10 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { Node } from "reactflow";
 import LeftSidebar from "./LeftSidebar";
 import RightSidebar from "./RightSidebar";
+import PropertiesSidebar from "./PropertiesSidebar";
 import TopToolbar from "./TopToolbar";
 import CanvasArea from "./CanvasArea";
 import { CaretLeft } from "@phosphor-icons/react";
@@ -10,6 +12,7 @@ import { CaretLeft } from "@phosphor-icons/react";
 export default function CanvasLayout() {
   const [leftSidebarOpen, setLeftSidebarOpen] = useState(true);
   const [rightSidebarOpen, setRightSidebarOpen] = useState(true);
+  const [selectedNode, setSelectedNode] = useState<Node | null>(null);
   const [leftWidth] = useState(280);
   const [rightWidth] = useState(380);
 
@@ -39,15 +42,21 @@ export default function CanvasLayout() {
           width={leftWidth}
         />
         
-        <CanvasArea />
+        <CanvasArea onNodeSelect={setSelectedNode} />
         
         <RightSidebar 
-          isOpen={rightSidebarOpen} 
+          isOpen={rightSidebarOpen && !selectedNode} 
           toggle={() => setRightSidebarOpen(!rightSidebarOpen)}
           width={rightWidth}
         />
 
-        {!rightSidebarOpen && (
+        <PropertiesSidebar 
+          isOpen={!!selectedNode} 
+          node={selectedNode} 
+          onClose={() => setSelectedNode(null)} 
+        />
+
+        {!rightSidebarOpen && !selectedNode && (
           <button 
             onClick={() => setRightSidebarOpen(true)}
             className="absolute right-4 top-4 z-50 p-2 bg-card-bg rounded-full text-foreground shadow-lg hover:text-orange-400 transition-colors"

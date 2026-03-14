@@ -1,5 +1,4 @@
 "use client"
-import { CodeBlockIcon } from "@phosphor-icons/react";
 import Navbar from "./components/Navbar";
 import Features from "@/components/landing/Features";
 import Pricing from "@/components/landing/Pricing";
