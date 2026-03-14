@@ -49,12 +49,20 @@ export default function LeftSidebar({ isOpen, toggle, width = 280 }: SidebarProp
             </motion.span>
           )}
         </AnimatePresence>
-        <button
+        {/*<button
           onClick={toggle}
           className="p-1.5 rounded text-black bg-canvas-bg hover:bg-mainColor transition-colors"
         >
           <SidebarIcon size={20} />
-        </button>
+        </button>*/}
+      </div>
+
+      <div className={`px-4 pb-2 ${isOpen ? "opacity-100" : "opacity-0 pointer-events-none"} transition-all duration-300`}>
+        <div className="flex items-center gap-2 text-xs font-medium text-black/40">
+          <span>All</span>
+          <span>/</span>
+          <span className="text-black">System Architecture</span>
+        </div>
       </div>
 
       {/* Search */}

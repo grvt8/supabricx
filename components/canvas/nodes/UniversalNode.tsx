@@ -1,6 +1,7 @@
 import { memo } from 'react';
-import { Handle, Position, NodeProps } from 'reactflow';
+import { Handle, Position, NodeProps, useReactFlow } from 'reactflow';
 import Image from 'next/image';
+import { Copy, Trash } from "@phosphor-icons/react";
 import { ICON_MAP } from '../constants';
 
 const hexToRgba = (hex: string, alpha: number) => {
@@ -13,14 +14,54 @@ const hexToRgba = (hex: string, alpha: number) => {
   return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 };
 
-const UniversalNode = ({ data, selected }: NodeProps) => {
+const UniversalNode = ({ id, data, selected }: NodeProps) => {
+  const { deleteElements, addNodes, getNode } = useReactFlow();
   const IconComponent = data.iconName ? ICON_MAP[data.iconName as keyof typeof ICON_MAP] : null;
   const color = data.color || '#000000';
   const bgColor = hexToRgba(color, 0.1); // 10% opacity for background
   const borderColor = hexToRgba(color, 0.5); // 50% opacity for border
 
+  const handleDelete = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    deleteElements({ nodes: [{ id }] });
+  };
+
+  const handleDuplicate = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const node = getNode(id);
+    if (node) {
+      addNodes({
+        ...node,
+        id: `${node.type}-${Date.now()}`,
+        position: {
+          x: node.position.x + 20,
+          y: node.position.y + 20,
+        },
+        selected: false,
+      });
+    }
+  };
+
   return (
     <div className="relative group">
+      {/* Action Buttons (Visible on Hover) */}
+      <div className="absolute -top-8 left-1/2 -translate-x-1/2 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none group-hover:pointer-events-auto z-50">
+        <button
+          onClick={handleDuplicate}
+          className="p-1.5 bg-white shadow-md rounded-md text-black/60 hover:text-blue-500 hover:bg-blue-50 transition-colors"
+          title="Duplicate"
+        >
+          <Copy size={14} />
+        </button>
+        <button
+          onClick={handleDelete}
+          className="p-1.5 bg-white shadow-md rounded-md text-black/60 hover:text-red-500 hover:bg-red-50 transition-colors"
+          title="Delete"
+        >
+          <Trash size={14} />
+        </button>
+      </div>
+
       {/* Node Container */}
       <div
         className={`

@@ -23,22 +23,14 @@ function CanvasLayoutContent() {
   const [rightWidth] = useState(380);
   const { viewMode } = useViewMode();
 
-  // Toggle Insert Menu
-  const toggleInsertMenu = () => {
-    if (isInsertMenuOpen) {
-      setIsInsertMenuOpen(false);
-    } else {
-      setIsInsertMenuOpen(true);
-      setIsComponentLibraryOpen(false); // Close component library when opening insert menu
-    }
-  };
-
   // Handle diagram selection from Insert Menu
   const handleDiagramSelect = (type: string) => {
-    // For now, any selection opens the component library
-    console.log("Selected diagram type:", type);
     setIsInsertMenuOpen(false);
-    setIsComponentLibraryOpen(true);
+    if (type === "system-architecture") {
+      setIsComponentLibraryOpen(true);
+    } else {
+      setIsComponentLibraryOpen(false);
+    }
   };
 
   // Persist state (Right Sidebar only for now)
@@ -92,12 +84,13 @@ function CanvasLayoutContent() {
               width={320}
             />
 
-            {/* Component Library (Left Sidebar) */}
-            <LeftSidebar 
-              isOpen={isComponentLibraryOpen} 
-              toggle={() => setIsComponentLibraryOpen(!isComponentLibraryOpen)} 
-              width={leftWidth}
-            />
+            {isComponentLibraryOpen && (
+              <LeftSidebar 
+                isOpen={true} 
+                toggle={() => setIsComponentLibraryOpen(false)} 
+                width={leftWidth}
+              />
+            )}
             
             <CanvasArea onNodeSelect={setSelectedNode} />
             
