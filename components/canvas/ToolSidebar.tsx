@@ -31,7 +31,7 @@ export default function ToolSidebar({ isOpen, toggle, activeTool, setActiveTool 
   ];
 
   return (
-    <div className="flex h-full w-[60px] flex-col items-center bg-foreground py-4 z-50 border-r border-border-dark/50 shadow-sm">
+    <div className="flex h-full w-[60px] flex-col items-center bg-foreground py-4 z-50 border-r border-border-black/10 shadow-sm">
       {/* Toggle Button */}
       <button
         onClick={toggle}
