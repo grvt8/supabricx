@@ -3,13 +3,7 @@
 import { useState } from "react";
 import Image from "next/image";
 import { 
-  ArrowUUpLeft, 
-  ArrowUUpRight, 
-  Plus, 
-  Minus, 
   ClockCounterClockwise,
-  ChatText,
-  VideoCamera,
   CaretDown,
   Globe,
   CloudCheckIcon
@@ -51,7 +45,7 @@ export default function TopToolbar() {
         </button>
 
         {/* Share Button */}
-        <div className="flex items-center h-10 bg-mainColor hover:bg-subColor text-[#351300] rounded-full pl-4 pr-2 cursor-pointer transition-colors">
+        <div className="flex items-center h-10 bg-mainColor hover:bg-mainColor/50 text-[#351300] rounded-full pl-4 pr-2 cursor-pointer transition-colors">
           <div className="flex items-center gap-2 pr-3">
             <Globe size={20} />
             <span className="font-semibold text-sm">Share</span>

@@ -12,45 +12,47 @@ import ReactFlow, {
   addEdge,
   Connection,
   ReactFlowInstance,
+  NodeMouseHandler,
 } from 'reactflow';
 import 'reactflow/dist/style.css';
 
-import ServiceNode from './nodes/ServiceNode';
-import DatabaseNode from './nodes/DatabaseNode';
-import GatewayNode from './nodes/GatewayNode';
-import BaseNode from './nodes/BaseNode';
-import { NODE_DEFAULTS } from './nodeDefaults';
+import UniversalNode from './nodes/UniversalNode';
+import { getNodeConfig } from './constants';
+
+interface CanvasAreaProps {
+  onNodeSelect?: (node: Node | null) => void;
+}
 
 const initialNodes: Node[] = [
   {
     id: 'gateway-1',
-    type: 'gateway',
+    type: 'universal',
     position: { x: 250, y: 50 },
-    data: { label: 'API Gateway', type: 'API Gateway', routes: '12 routes', rateLimit: '1000 req/min' },
+    data: { label: 'API Gateway', iconName: 'Shield', color: '#FF2F9F', type: 'API Gateway', routes: '12 routes', rateLimit: '1000 req/min' },
   },
   {
     id: 'service-1',
-    type: 'service',
+    type: 'universal',
     position: { x: 100, y: 250 },
-    data: { label: 'Auth Service', language: 'Node.js', port: ':3000', status: 'ok', instances: 2 },
+    data: { label: 'Auth Service', iconName: 'Cube', color: '#FF2F9F', language: 'Node.js', port: ':3000', status: 'ok', instances: 2 },
   },
   {
     id: 'service-2',
-    type: 'service',
+    type: 'universal',
     position: { x: 400, y: 250 },
-    data: { label: 'Payment Service', language: 'Go', port: ':8080', status: 'ok', instances: 3 },
+    data: { label: 'Payment Service', iconName: 'Cube', color: '#FF2F9F', language: 'Go', port: ':8080', status: 'ok', instances: 3 },
   },
   {
     id: 'db-1',
-    type: 'database',
+    type: 'universal',
     position: { x: 100, y: 450 },
-    data: { label: 'Users DB', type: 'PostgreSQL', connection: 'postgres://...', storage: '50GB', replicas: '1 primary' },
+    data: { label: 'Users DB', iconName: 'Database', color: '#2FC1FF', imageSrc: '/postgresql.png', type: 'PostgreSQL', connection: 'postgres://...', storage: '50GB', replicas: '1 primary' },
   },
   {
     id: 'db-2',
-    type: 'database',
+    type: 'universal',
     position: { x: 400, y: 450 },
-    data: { label: 'Cache', type: 'Redis', connection: 'redis://...', storage: '2GB', replicas: '1 node' },
+    data: { label: 'Cache', iconName: 'Database', color: '#2FC1FF', imageSrc: '/redis.png', type: 'Redis', connection: 'redis://...', storage: '2GB', replicas: '1 node' },
   },
 ];
 
@@ -61,7 +63,7 @@ const initialEdges: Edge[] = [
   { id: 'e3-5', source: 'service-2', target: 'db-2', style: { stroke: '#a3a3a3', strokeDasharray: '5,5' } },
 ];
 
-export default function CanvasArea() {
+export default function CanvasArea({ onNodeSelect }: CanvasAreaProps) {
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
   const [reactFlowInstance, setReactFlowInstance] = useState<ReactFlowInstance | null>(null);
@@ -91,32 +93,21 @@ export default function CanvasArea() {
         y: event.clientY,
       });
 
-      let nodeType = 'base';
-      let nodeData: Record<string, unknown> = { label: typeLabel };
-
-      if (NODE_DEFAULTS[typeLabel]) {
-        const config = NODE_DEFAULTS[typeLabel];
-        nodeType = config.type;
-        nodeData = { ...config.data };
-      } else {
-        // Fallback for legacy items if any
-        if (['Server', 'Function', 'Container'].includes(typeLabel)) {
-          nodeType = 'service';
-          nodeData = { ...nodeData, language: 'Node.js', port: ':8080', status: 'ok', instances: 1 };
-        } else if (['PostgreSQL', 'Redis', 'S3 Bucket', 'Table'].includes(typeLabel)) {
-          nodeType = 'database';
-          nodeData = { ...nodeData, type: typeLabel, connection: 'conn://...', storage: '10GB', replicas: '1' };
-        } else if (['API Gateway', 'Load Balancer', 'Firewall'].includes(typeLabel)) {
-          nodeType = 'gateway';
-          nodeData = { ...nodeData, type: typeLabel, routes: '0', rateLimit: '1000' };
-        }
-      }
-
+      // Get configuration from constants
+      const config = getNodeConfig(typeLabel);
+      
       const newNode: Node = {
-        id: `${nodeType}-${Date.now()}`,
-        type: nodeType,
+        id: `node-${Date.now()}`,
+        type: 'universal',
         position,
-        data: nodeData,
+        data: { 
+          label: typeLabel,
+          iconName: config?.iconName || 'Cube',
+          color: config?.color || '#000000',
+          imageSrc: config?.imageSrc,
+          // Add default properties based on type
+          ...config
+        },
       };
 
       setNodes((nds) => nds.concat(newNode));
@@ -124,11 +115,25 @@ export default function CanvasArea() {
     [reactFlowInstance, setNodes],
   );
 
+  const onNodeClick: NodeMouseHandler = useCallback((event, node) => {
+    if (onNodeSelect) {
+      onNodeSelect(node);
+    }
+  }, [onNodeSelect]);
+
+  const onPaneClick = useCallback(() => {
+    if (onNodeSelect) {
+      onNodeSelect(null);
+    }
+  }, [onNodeSelect]);
+
   const nodeTypes = useMemo(() => ({
-    service: ServiceNode,
-    database: DatabaseNode,
-    gateway: GatewayNode,
-    base: BaseNode,
+    universal: UniversalNode,
+    // Map legacy types to universal node to ensure consistent styling
+    service: UniversalNode,
+    database: UniversalNode,
+    gateway: UniversalNode,
+    base: UniversalNode,
   }), []);
 
   return (
@@ -142,6 +147,8 @@ export default function CanvasArea() {
         onInit={setReactFlowInstance}
         onDrop={onDrop}
         onDragOver={onDragOver}
+        onNodeClick={onNodeClick}
+        onPaneClick={onPaneClick}
         nodeTypes={nodeTypes}
         connectionMode={ConnectionMode.Loose}
         fitView

@@ -1,43 +1,14 @@
 "use client";
 
-import Image from "next/image";
 import { useState } from "react";
+import Image from "next/image";
 import { 
-  CaretLeft, 
-  CaretRight, 
-  MagnifyingGlass, 
   CaretDown,
-  Cloud,
-  Cpu,
-  Lightning,
-  Database,
-  Globe,
-  Shield,
-  HardDrives,
-  Cube,
-  Scales,
-  Browsers,
-  Clock,
-  Files,
-  Warehouse,
-  Queue,
-  Broadcast,
-  Waves,
-  Envelope,
-  TreeStructure,
-  ArrowsLeftRight,
-  IdentificationCard,
-  Key,
-  Wall,
-  Certificate,
-  Scroll,
-  ChartLine,
-  Binoculars,
-  User,
+  MagnifyingGlass,
   SidebarIcon,
-  Plugs
 } from "@phosphor-icons/react";
 import { motion, AnimatePresence } from "framer-motion";
+import { NODE_CATEGories, ICON_MAP } from "./constants";
 
 interface SidebarProps {
   isOpen: boolean;
@@ -47,6 +18,7 @@ interface SidebarProps {
 
 export default function LeftSidebar({ isOpen, toggle, width = 280 }: SidebarProps) {
   const [activeCategory, setActiveCategory] = useState<string | null>("compute");
+  
   const iconBg = (hex: string, alpha: number) => {
     const normalized = hex.replace("#", "");
     const full = normalized.length === 3 ? normalized.split("").map((c) => c + c).join("") : normalized;
@@ -55,88 +27,6 @@ export default function LeftSidebar({ isOpen, toggle, width = 280 }: SidebarProp
     const b = Number.parseInt(full.slice(4, 6), 16);
     return `rgba(${r}, ${g}, ${b}, ${alpha})`;
   };
-
-  const categories = [
-    {
-      id: "compute",
-      label: "Compute & Logic",
-      icon: <Cpu size={25} weight="fill" color="#FF2F9F" />,
-      items: [
-        { label: "Load Balancer", icon: <Scales size={20} color="#FF2F9F" />, color: "#FF2F9F" },
-        { label: "API Gateway", icon: <Shield size={20} color="#FF2F9F" />, color: "#FF2F9F" },
-        { label: "Microservice", icon: <Cube size={20} color="#FF2F9F"/>, color: "#FF2F9F" },
-        { label: "Serverless Function", icon: <Lightning size={20} color="#FF2F9F" />, color: "#FF2F9F" },
-        { label: "Monolith App", icon: <Browsers size={20} color="#FF2F9F" />, color: "#FF2F9F" },
-        { label: "Scheduler/Worker", icon: <Clock size={20} color="#FF2F9F" />, color: "#FF2F9F" },
-      ]
-    },
-    {
-      id: "data",
-      label: "Data & Storage",
-      icon: <Database size={25} weight="fill" color="#2FC1FF"/>,
-      items: [
-        { label: "Relational DB", icon: <Image src="/postgresql.png" alt="PostgreSQL" width={16} height={16} />, color: "#2FC1FF" },
-        { label: "NoSQL DB", icon: <Files size={20} color="#2FC1FF"/>, color: "#2FC1FF" },
-        { label: "Cache", icon: <Image src="/redis.png" alt="Redis" width={16} height={16} />, color: "#2FC1FF" },
-        { label: "Object Storage", icon: <HardDrives size={20} color="#2FC1FF" />, color: "#2FC1FF" },
-        { label: "Data Warehouse", icon: <Warehouse size={20} color="#2FC1FF" />, color: "#2FC1FF" },
-        { label: "Search Engine", icon: <MagnifyingGlass size={20} color="#2FC1FF" />, color: "#2FC1FF" },
-      ]
-    },
-    {
-      id: "messaging",
-      label: "Messaging & Streaming",
-      icon: <Broadcast size={25} weight="fill" color="#BF34D6"/>,
-      items: [
-        { label: "Message Queue", icon: <Queue size={20} color="#BF34D6"/>, color: "#BF34D6" },
-        { label: "Pub/Sub Topic", icon: <Broadcast size={20} color="#BF34D6"/>, color: "#BF34D6" },
-        { label: "Event Stream", icon: <Waves size={20} color="#BF34D6"/>, color: "#BF34D6" },
-        { label: "Email Service", icon: <Envelope size={20} color="#BF34D6"/>, color: "#BF34D6" },
-      ]
-    },
-    {
-      id: "network",
-      label: "Network & Edge",
-      icon: <Globe size={25} weight="fill" color="#28F0CC"/>,
-      items: [
-        { label: "VPC / Network", icon: <Globe size={20} color="#28F0CC"/>, color: "#28F0CC" },
-        { label: "Subnet", icon: <TreeStructure size={20} color="#28F0CC"/>, color: "#28F0CC" },
-        { label: "CDN", icon: <Cloud size={20} color="#28F0CC"/>, color: "#28F0CC" },
-        { label: "DNS / Domain", icon: <Globe size={20} color="#28F0CC"/>, color: "#28F0CC" },
-        { label: "NAT Gateway", icon: <ArrowsLeftRight size={20} color="#28F0CC"/>, color: "#28F0CC" },
-      ]
-    },
-    {
-      id: "security",
-      label: "Security & Identity",
-      icon: <Shield size={25} weight="fill" color="#46E84C"/>,
-      items: [
-        { label: "Identity Provider", icon: <IdentificationCard size={20} color="#46E84C"/>, color: "#46E84C" },
-        { label: "Secrets Manager", icon: <Key size={20} color="#46E84C"/>, color: "#46E84C" },
-        { label: "WAF", icon: <Wall size={20} color="#46E84C"/>, color: "#46E84C" },
-        { label: "Certificate / SSL", icon: <Certificate size={20} color="#46E84C"/>, color: "#46E84C" },
-      ]
-    },
-    {
-      id: "observability",
-      label: "Observability",
-      icon: <ChartLine size={25} weight="fill" color="#FF802F"/>,
-      items: [
-        { label: "Logging Service", icon: <Scroll size={20} color="#FF802F"/>, color: "#FF802F" },
-        { label: "Metrics / Monitoring", icon: <ChartLine size={20} color="#FF802F"/>, color: "#FF802F" },
-        { label: "Tracing", icon: <Binoculars size={20} color="#FF802F"/>, color: "#FF802F" },
-      ]
-    },
-    {
-      id: "external",
-      label: "External & Users",
-      icon: <User size={25} weight="fill" color="#FF2F5B"/>,
-      items: [
-        { label: "End User / Client", icon: <User size={20} color="#FF2F5B"/>, color: "#FF2F5B" },
-        { label: "3rd Party API", icon: <Plugs size={20} color="#FF2F5B"/>, color: "#FF2F5B" },
-      ]
-    }
-  ];
 
   return (
     <motion.div
@@ -163,7 +53,7 @@ export default function LeftSidebar({ isOpen, toggle, width = 280 }: SidebarProp
           onClick={toggle}
           className="p-1.5 rounded text-black bg-canvas-bg hover:bg-mainColor transition-colors"
         >
-          {isOpen ? <SidebarIcon size={20} /> : <SidebarIcon size={20} />}
+          <SidebarIcon size={20} />
         </button>
       </div>
 
@@ -181,67 +71,79 @@ export default function LeftSidebar({ isOpen, toggle, width = 280 }: SidebarProp
 
       {/* Categories */}
       <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-border-dark scrollbar-track-transparent">
-        {categories.map((category) => (
-          <div key={category.id} className="">
-            <button
-              onClick={() => setActiveCategory(activeCategory === category.id ? null : category.id)}
-              className={`flex w-full items-center justify-between px-4 py-3 hover:bg-canvas-bg transition-colors ${
-                !isOpen && "justify-center px-2"
-              }`}
-              title={!isOpen ? category.label : undefined}
-            >
-              <div className="flex items-center gap-3 text-sm font-medium text-black">
-                <span className={`${activeCategory === category.id ? "text-orange-400" : ""}`}>
-                  {category.icon}
-                </span>
-                {isOpen && <span>{category.label}</span>}
-              </div>
-              {isOpen && (
-                <CaretDown
-                  size={14}
-                  className={`text-muted transition-transform duration-200 ${
-                    activeCategory === category.id ? "rotate-180" : ""
-                  }`}
-                />
-              )}
-            </button>
-            
-            <AnimatePresence>
-              {isOpen && activeCategory === category.id && (
-                <motion.div
-                  initial={{ height: 0, opacity: 0 }}
-                  animate={{ height: "auto", opacity: 1 }}
-                  exit={{ height: 0, opacity: 0 }}
-                  className="overflow-hidden bg-canvas-bg"
-                >
-                  <div className="px-4 pb-3 pt-1 space-y-1">
-                    {category.items.map((item) => (
-                      <div
-                        key={item.label}
-                        className="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-border-dark cursor-grab active:cursor-grabbing group transition-colors"
-                        draggable
-                        onDragStart={(e) => {
-                          e.dataTransfer.setData("application/reactflow", item.label);
-                          e.dataTransfer.effectAllowed = "move";
-                        }}
-                      >
-                        <div
-                          className="flex h-9 w-9 items-center justify-center rounded-lg"
-                          style={{ backgroundColor: iconBg(item.color, 0.2) }}
-                        >
-                          {item.icon}
-                        </div>
-                        <span className="text-sm text-black/50 group-hover:text-foreground transition-colors">
-                          {item.label}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
-        ))}
+        {NODE_CATEGories.map((category) => {
+          const CategoryIcon = ICON_MAP[category.iconName];
+          
+          return (
+            <div key={category.id} className="">
+              <button
+                onClick={() => setActiveCategory(activeCategory === category.id ? null : category.id)}
+                className={`flex w-full items-center justify-between px-4 py-3 hover:bg-canvas-bg transition-colors ${
+                  !isOpen && "justify-center px-2"
+                }`}
+                title={!isOpen ? category.label : undefined}
+              >
+                <div className="flex items-center gap-3 text-sm font-medium text-black">
+                  <span className={`${activeCategory === category.id ? "text-orange-400" : ""}`}>
+                    <CategoryIcon size={25} weight="fill" color={category.color} />
+                  </span>
+                  {isOpen && <span>{category.label}</span>}
+                </div>
+                {isOpen && (
+                  <CaretDown
+                    size={14}
+                    className={`text-muted transition-transform duration-200 ${
+                      activeCategory === category.id ? "rotate-180" : ""
+                    }`}
+                  />
+                )}
+              </button>
+              
+              <AnimatePresence>
+                {isOpen && activeCategory === category.id && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: "auto", opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    className="overflow-hidden bg-canvas-bg"
+                  >
+                    <div className="px-4 pb-3 pt-1 space-y-1">
+                      {category.items.map((item) => {
+                        const ItemIcon = ICON_MAP[item.iconName];
+                        
+                        return (
+                          <div
+                            key={item.label}
+                            className="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-border-dark cursor-grab active:cursor-grabbing group transition-colors"
+                            draggable
+                            onDragStart={(e) => {
+                              e.dataTransfer.setData("application/reactflow", item.label);
+                              e.dataTransfer.effectAllowed = "move";
+                            }}
+                          >
+                            <div
+                              className="flex h-9 w-9 items-center justify-center rounded-lg"
+                              style={{ backgroundColor: iconBg(item.color, 0.2) }}
+                            >
+                              {item.imageSrc ? (
+                                <Image src={item.imageSrc} alt={item.label} width={16} height={16} />
+                              ) : (
+                                <ItemIcon size={20} color={item.color} />
+                              )}
+                            </div>
+                            <span className="text-sm text-black/50 group-hover:text-foreground transition-colors">
+                              {item.label}
+                            </span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          );
+        })}
       </div>
     </motion.div>
   );
