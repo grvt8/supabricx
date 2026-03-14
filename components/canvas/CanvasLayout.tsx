@@ -9,9 +9,11 @@ import RightSidebar from "./RightSidebar";
 import PropertiesSidebar from "./PropertiesSidebar";
 import TopToolbar from "./TopToolbar";
 import CanvasArea from "./CanvasArea";
+import DocumentPanel from "./DocumentPanel";
 import { CaretLeft } from "@phosphor-icons/react";
+import { ViewModeProvider, useViewMode } from "./ViewModeContext";
 
-export default function CanvasLayout() {
+function CanvasLayoutContent() {
   const [isInsertMenuOpen, setIsInsertMenuOpen] = useState(false);
   const [isComponentLibraryOpen, setIsComponentLibraryOpen] = useState(false);
   const [activeTool, setActiveTool] = useState("select");
@@ -19,6 +21,7 @@ export default function CanvasLayout() {
   const [selectedNode, setSelectedNode] = useState<Node | null>(null);
   const [leftWidth] = useState(280);
   const [rightWidth] = useState(380);
+  const { viewMode } = useViewMode();
 
   // Toggle Insert Menu
   const toggleInsertMenu = () => {
@@ -33,6 +36,7 @@ export default function CanvasLayout() {
   // Handle diagram selection from Insert Menu
   const handleDiagramSelect = (type: string) => {
     // For now, any selection opens the component library
+    console.log("Selected diagram type:", type);
     setIsInsertMenuOpen(false);
     setIsComponentLibraryOpen(true);
   };
@@ -47,62 +51,87 @@ export default function CanvasLayout() {
     localStorage.setItem("canvas-right-sidebar", rightSidebarOpen.toString());
   }, [rightSidebarOpen]);
 
+  // Determine which panels to show based on view mode
+  const showDocument = viewMode === "document" || viewMode === "both";
+  const showCanvas = viewMode === "canvas" || viewMode === "both";
+
   return (
     <div className="flex h-screen w-screen flex-col overflow-hidden bg-[var(--color-background)] text-foreground">
       <TopToolbar />
       <div className="flex flex-1 overflow-hidden relative">
-        {/* Tool Sidebar (Always visible) */}
-        <ToolSidebar 
-          isOpen={isInsertMenuOpen || isComponentLibraryOpen} 
-          toggle={() => {
-            if (isInsertMenuOpen || isComponentLibraryOpen) {
-              setIsInsertMenuOpen(false);
-              setIsComponentLibraryOpen(false);
-            } else {
-              setIsInsertMenuOpen(true);
-            }
-          }}
-          activeTool={activeTool}
-          setActiveTool={setActiveTool}
-        />
-
-        {/* Insert Menu (Overlay or Push) */}
-        <InsertMenu 
-          isOpen={isInsertMenuOpen} 
-          onSelectDiagram={handleDiagramSelect}
-          width={320}
-        />
-
-        {/* Component Library (Left Sidebar) */}
-        {/* <LeftSidebar 
-          isOpen={isComponentLibraryOpen} 
-          toggle={() => setIsComponentLibraryOpen(!isComponentLibraryOpen)} 
-          width={leftWidth}
-        /> */}
         
-        <CanvasArea onNodeSelect={setSelectedNode} />
-        
-        <RightSidebar 
-          isOpen={rightSidebarOpen && !selectedNode} 
-          toggle={() => setRightSidebarOpen(!rightSidebarOpen)}
-          width={rightWidth}
-        />
+        {/* Document View */}
+        {showDocument && (
+          <div className={`${viewMode === "both" ? "w-1/2 resize-x" : "w-full"} h-full relative z-30`}>
+            <DocumentPanel />
+          </div>
+        )}
 
-        <PropertiesSidebar 
-          isOpen={!!selectedNode} 
-          node={selectedNode} 
-          onClose={() => setSelectedNode(null)} 
-        />
+        {/* Canvas View */}
+        {showCanvas && (
+          <div className="flex-1 flex h-full relative overflow-hidden">
+            {/* Tool Sidebar (Always visible in canvas mode) */}
+            <ToolSidebar 
+              isOpen={isInsertMenuOpen || isComponentLibraryOpen} 
+              toggle={() => {
+                if (isInsertMenuOpen || isComponentLibraryOpen) {
+                  setIsInsertMenuOpen(false);
+                  setIsComponentLibraryOpen(false);
+                } else {
+                  setIsInsertMenuOpen(true);
+                }
+              }}
+              activeTool={activeTool}
+              setActiveTool={setActiveTool}
+            />
 
-        {!rightSidebarOpen && !selectedNode && (
-          <button 
-            onClick={() => setRightSidebarOpen(true)}
-            className="absolute right-4 top-4 z-50 p-2 bg-card-bg rounded-full text-foreground shadow-lg hover:text-orange-400 transition-colors"
-          >
-            <CaretLeft size={20} />
-          </button>
+            {/* Insert Menu (Overlay or Push) */}
+            <InsertMenu 
+              isOpen={isInsertMenuOpen} 
+              onSelectDiagram={handleDiagramSelect}
+              width={320}
+            />
+
+            {/* Component Library (Left Sidebar) */}
+            <LeftSidebar 
+              isOpen={isComponentLibraryOpen} 
+              toggle={() => setIsComponentLibraryOpen(!isComponentLibraryOpen)} 
+              width={leftWidth}
+            />
+            
+            <CanvasArea onNodeSelect={setSelectedNode} />
+            
+            <RightSidebar 
+              isOpen={rightSidebarOpen && !selectedNode} 
+              toggle={() => setRightSidebarOpen(!rightSidebarOpen)}
+              width={rightWidth}
+            />
+
+            <PropertiesSidebar 
+              isOpen={!!selectedNode} 
+              node={selectedNode} 
+              onClose={() => setSelectedNode(null)} 
+            />
+
+            {!rightSidebarOpen && !selectedNode && (
+              <button 
+                onClick={() => setRightSidebarOpen(true)}
+                className="absolute right-4 top-4 z-50 p-2 bg-card-bg rounded-full text-foreground shadow-lg hover:text-orange-400 transition-colors"
+              >
+                <CaretLeft size={20} />
+              </button>
+            )}
+          </div>
         )}
       </div>
     </div>
+  );
+}
+
+export default function CanvasLayout() {
+  return (
+    <ViewModeProvider>
+      <CanvasLayoutContent />
+    </ViewModeProvider>
   );
 }
