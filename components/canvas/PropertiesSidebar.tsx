@@ -50,7 +50,7 @@ export default function PropertiesSidebar({ isOpen, node, onClose, onDelete, onU
               <select
                 value={(formData.brokerType as string) || "RabbitMQ"}
                 onChange={(e) => handleChange("brokerType", e.target.value)}
-                className="w-full appearance-none bg-canvas-bg border border-black/10 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-orange-400"
+                className="w-full appearance-none bg-canvas-bg border text-black border-black/5 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-orange-400"
               >
                 <option value="RabbitMQ">RabbitMQ</option>
                 <option value="Kafka">Apache Kafka</option>
@@ -69,7 +69,7 @@ export default function PropertiesSidebar({ isOpen, node, onClose, onDelete, onU
               value={(formData.queueName as string) || ""}
               onChange={(e) => handleChange("queueName", e.target.value)}
               placeholder="e.g. orders-queue"
-              className="w-full bg-canvas-bg border border-black/10 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-orange-400"
+              className="w-full bg-canvas-bg text-black border border-black/5 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-orange-400"
             />
           </div>
 
@@ -82,7 +82,7 @@ export default function PropertiesSidebar({ isOpen, node, onClose, onDelete, onU
                     name="durability"
                     checked={formData.durability === "durable"} 
                     onChange={() => handleChange("durability", "durable")}
-                    className="text-orange-500 focus:ring-orange-500"
+                    className="text-subColor focus:ring-subColor"
                   />
                   Durable
                 </label>
@@ -111,7 +111,7 @@ export default function PropertiesSidebar({ isOpen, node, onClose, onDelete, onU
             <select
               value={(formData.method as string) || "GET"}
               onChange={(e) => handleChange("method", e.target.value)}
-              className="w-full appearance-none bg-canvas-bg border border-black/10 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-orange-400"
+              className="w-full appearance-none bg-canvas-bg border border-black/5 rounded-lg px-3 py-2 text-sm text-black focus:outline-none focus:border-orange-400"
             >
               <option value="GET">GET</option>
               <option value="POST">POST</option>
@@ -131,7 +131,7 @@ export default function PropertiesSidebar({ isOpen, node, onClose, onDelete, onU
               value={(formData.url as string) || ""}
               onChange={(e) => handleChange("url", e.target.value)}
               placeholder="https://api.example.com/endpoint"
-              className="w-full bg-canvas-bg border border-black/10 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-orange-400"
+              className="w-full bg-canvas-bg border border-black/5 rounded-lg px-3 py-2 text-black text-sm focus:outline-none focus:border-orange-400"
             />
             <div className="absolute right-2 top-1/2 -translate-y-1/2 p-1 bg-black/5 rounded cursor-pointer hover:bg-black/10">
                <Database size={12} className="text-black/50" />
@@ -168,7 +168,7 @@ export default function PropertiesSidebar({ isOpen, node, onClose, onDelete, onU
       initial={{ x: "100%" }}
       animate={{ x: isOpen ? 0 : "100%" }}
       transition={{ duration: 0.3, ease: "easeInOut" }}
-      className="absolute top-0 right-0 h-full w-[380px] bg-white border-l border-border-dark shadow-xl z-50 flex flex-col"
+      className="absolute top-0 right-0 h-full w-[380px] bg-white border-l border-border-black/10 shadow-xl z-50 flex flex-col"
     >
       {/* Header */}
       <div className="flex items-center justify-between p-4 border-b border-black/5">
