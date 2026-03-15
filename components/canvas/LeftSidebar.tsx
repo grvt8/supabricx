@@ -5,7 +5,6 @@ import Image from "next/image";
 import { 
   CaretDown,
   MagnifyingGlass,
-  SidebarIcon,
 } from "@phosphor-icons/react";
 import { motion, AnimatePresence } from "framer-motion";
 import { NODE_CATEGories, ICON_MAP } from "./constants";
@@ -16,8 +15,9 @@ interface SidebarProps {
   width?: number;
 }
 
-export default function LeftSidebar({ isOpen, toggle, width = 280 }: SidebarProps) {
+export default function LeftSidebar({ isOpen, toggle: _toggle, width = 280 }: SidebarProps) {
   const [activeCategory, setActiveCategory] = useState<string | null>("compute");
+  void _toggle;
   
   const iconBg = (hex: string, alpha: number) => {
     const normalized = hex.replace("#", "");

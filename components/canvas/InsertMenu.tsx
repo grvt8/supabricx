@@ -88,11 +88,6 @@ export default function InsertMenu({ isOpen, onSelectDiagram, width = 320 }: Ins
     }
   };
 
-  const handleBack = () => {
-    setCurrentView("main");
-    setBreadcrumbs(["All"]);
-  };
-
   const navigateToCrumb = (crumb: string, index: number) => {
     if (index === 0) {
       setCurrentView("main");

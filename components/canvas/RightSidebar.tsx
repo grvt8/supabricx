@@ -40,7 +40,7 @@ export default function RightSidebar({ isOpen, toggle, width = 380 }: SidebarPro
             <CaretRight size={16} className={!isOpen ? "rotate-180" : ""} />
           </button>
           <div className="flex items-center gap-2">
-            <span className="font-display font-medium text-black">Supabricx</span>
+            <span className="font-display font-medium text-black">Bricx</span>
           </div>
         </div>
         <div className="flex items-center gap-1">
