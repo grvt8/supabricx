@@ -16,7 +16,7 @@ interface PropertiesSidebarProps {
 export default function PropertiesSidebar({ isOpen, node, onClose, onDelete, onUpdate }: PropertiesSidebarProps) {
   // Local state for form fields
   const [formData, setFormData] = useState<Record<string, unknown>>({});
-  const [openDropdown, setOpenDropdown] = useState<"auth" | "db" | "broker" | null>(null);
+  const [openDropdown, setOpenDropdown] = useState<"auth" | "db" | "broker" | "payment" | null>(null);
 
   // Reset form data when node changes
   useEffect(() => {
@@ -209,6 +209,74 @@ export default function PropertiesSidebar({ isOpen, node, onClose, onDelete, onU
                     >
                       <Image src={d.imageSrc} alt={d.label} width={18} height={18} className="object-contain" />
                       <span>{d.label}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <label className="flex items-center gap-2 text-sm font-medium text-black/70">
+              Role in diagram
+              <StarBadge />
+            </label>
+            <textarea
+              value={((formData.role as string) || "").trim().length > 0 ? (formData.role as string) : defaultRole}
+              onChange={(e) => handleChange("role", e.target.value)}
+              className="w-full bg-canvas-bg text-black border border-black/5 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-orange-400 resize-none min-h-[96px]"
+            />
+          </div>
+        </div>
+      );
+    }
+
+    if (node.data.label === "Payment Gateway" || node.data.label === "Payment Service") {
+      const providers = [
+        { id: "paystack", label: "Paystack", imageSrc: "/paystack.png" },
+        { id: "flutterwave", label: "Flutterwave", imageSrc: "/flutterwave.png" },
+        { id: "stripe", label: "Stripe", imageSrc: "/stripe.png" },
+      ] as const;
+
+      const selectedProviderId = (formData.paymentProvider as string) || "stripe";
+      const selectedProvider = providers.find((p) => p.id === selectedProviderId) || providers[0];
+
+      const defaultRole =
+        "Processes customer payments, handles charge authorization, and receives webhook events for status updates.";
+
+      return (
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-black/70">Provider</label>
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => setOpenDropdown(openDropdown === "payment" ? null : "payment")}
+                className="w-full flex items-center justify-between bg-canvas-bg border border-black/5 rounded-lg px-3 py-2 text-sm text-black focus:outline-none focus:border-orange-400"
+              >
+                <span className="flex items-center gap-2">
+                  <Image src={selectedProvider.imageSrc} alt={selectedProvider.label} width={18} height={18} className="object-contain" />
+                  <span>{selectedProvider.label}</span>
+                </span>
+                <CaretDown className="text-black/40" size={14} />
+              </button>
+
+              {openDropdown === "payment" && (
+                <div className="absolute z-50 mt-2 w-full overflow-hidden rounded-lg bg-white shadow-lg border border-black/5">
+                  {providers.map((p) => (
+                    <button
+                      key={p.id}
+                      type="button"
+                      onClick={() => {
+                        handleChange("paymentProvider", p.id);
+                        handleChange("paymentProviderName", p.label);
+                        handleChange("imageSrc", p.imageSrc);
+                        setOpenDropdown(null);
+                      }}
+                      className="w-full flex items-center gap-2 px-3 py-2 text-sm text-black hover:bg-canvas-bg transition-colors"
+                    >
+                      <Image src={p.imageSrc} alt={p.label} width={18} height={18} className="object-contain" />
+                      <span>{p.label}</span>
                     </button>
                   ))}
                 </div>
