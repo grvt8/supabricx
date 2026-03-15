@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Node } from "reactflow";
 import LeftSidebar from "./LeftSidebar";
 import ToolSidebar from "./ToolSidebar";
@@ -8,7 +8,7 @@ import InsertMenu from "./InsertMenu";
 import RightSidebar from "./RightSidebar";
 import PropertiesSidebar from "./PropertiesSidebar";
 import TopToolbar from "./TopToolbar";
-import CanvasArea from "./CanvasArea";
+import CanvasArea, { CanvasApi } from "./CanvasArea";
 import DocumentPanel from "./DocumentPanel";
 import { CaretLeft } from "@phosphor-icons/react";
 import { ViewModeProvider, useViewMode } from "./ViewModeContext";
@@ -22,6 +22,7 @@ function CanvasLayoutContent() {
   const [leftWidth] = useState(280);
   const [rightWidth] = useState(380);
   const { viewMode } = useViewMode();
+  const canvasApiRef = useRef<CanvasApi | null>(null);
 
   // Handle diagram selection from Insert Menu
   const handleDiagramSelect = (type: string) => {
@@ -92,7 +93,12 @@ function CanvasLayoutContent() {
               />
             )}
             
-            <CanvasArea onNodeSelect={setSelectedNode} />
+            <CanvasArea
+              onNodeSelect={setSelectedNode}
+              onRegisterApi={(api) => {
+                canvasApiRef.current = api;
+              }}
+            />
             
             <RightSidebar 
               isOpen={rightSidebarOpen && !selectedNode} 
@@ -104,6 +110,10 @@ function CanvasLayoutContent() {
               isOpen={!!selectedNode} 
               node={selectedNode} 
               onClose={() => setSelectedNode(null)} 
+              onUpdate={(nodeId, data) => {
+                canvasApiRef.current?.updateNodeData(nodeId, data);
+                setSelectedNode((prev) => (prev && prev.id === nodeId ? { ...prev, data } : prev));
+              }}
             />
 
             {!rightSidebarOpen && !selectedNode && (

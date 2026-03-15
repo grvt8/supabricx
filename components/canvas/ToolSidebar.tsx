@@ -8,7 +8,7 @@ import {
   TextT, 
   Plus, 
   X,
-  Sparkle
+  GearSix
 } from "@phosphor-icons/react";
 
 interface ToolSidebarProps {
@@ -27,7 +27,7 @@ export default function ToolSidebar({ isOpen, toggle, activeTool, setActiveTool 
     { id: "line", icon: ArrowUpRight, label: "Line" },
     { id: "draw", icon: Pencil, label: "Draw" },
     { id: "text", icon: TextT, label: "Text" },
-    { id: "ai", icon: Sparkle, label: "AI Generate" },
+    { id: "settings", icon: GearSix, label: "Settings" },
   ];
 
   return (

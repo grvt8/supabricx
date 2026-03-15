@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import ReactFlow, {
   Background,
   Controls,
@@ -19,8 +19,13 @@ import 'reactflow/dist/style.css';
 import UniversalNode from './nodes/UniversalNode';
 import { getNodeConfig } from './constants';
 
+export interface CanvasApi {
+  updateNodeData: (nodeId: string, data: Record<string, unknown>) => void;
+}
+
 interface CanvasAreaProps {
   onNodeSelect?: (node: Node | null) => void;
+  onRegisterApi?: (api: CanvasApi) => void;
 }
 
 const initialNodes: Node[] = [
@@ -63,10 +68,26 @@ const initialEdges: Edge[] = [
   { id: 'e3-5', source: 'service-2', target: 'db-2', style: { stroke: '#a3a3a3', strokeDasharray: '5,5' } },
 ];
 
-export default function CanvasArea({ onNodeSelect }: CanvasAreaProps) {
+export default function CanvasArea({ onNodeSelect, onRegisterApi }: CanvasAreaProps) {
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
   const [reactFlowInstance, setReactFlowInstance] = useState<ReactFlowInstance | null>(null);
+  const nodesRef = useRef(nodes);
+
+  useEffect(() => {
+    nodesRef.current = nodes;
+  }, [nodes]);
+
+  const updateNodeData = useCallback((nodeId: string, data: Record<string, unknown>) => {
+    setNodes((prev) =>
+      prev.map((n) => (n.id === nodeId ? { ...n, data: { ...n.data, ...data } } : n)),
+    );
+  }, [setNodes]);
+
+  useEffect(() => {
+    if (!onRegisterApi) return;
+    onRegisterApi({ updateNodeData });
+  }, [onRegisterApi, updateNodeData]);
 
   const onConnect = useCallback(
     (params: Connection) => setEdges((eds) => addEdge({ ...params, style: { stroke: '#a3a3a3' } }, eds)),
