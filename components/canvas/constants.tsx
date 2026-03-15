@@ -101,9 +101,9 @@ export const NODE_CATEGories: NodeCategory[] = [
     iconName: "Database",
     color: "#2FC1FF",
     items: [
-      { label: "Relational DB", iconName: "Database", color: "#2FC1FF", imageSrc: "/postgresql.png" },
+      { label: "Relational DB", iconName: "Database", color: "#2FC1FF"},
       { label: "NoSQL DB", iconName: "Files", color: "#2FC1FF" },
-      { label: "Cache", iconName: "Database", color: "#2FC1FF", imageSrc: "/redis.png" },
+      { label: "Cache", iconName: "Database", color: "#2FC1FF" },
       { label: "Object Storage", iconName: "HardDrives", color: "#2FC1FF" },
       { label: "Data Warehouse", iconName: "Warehouse", color: "#2FC1FF" },
       { label: "Search Engine", iconName: "MagnifyingGlass", color: "#2FC1FF" },

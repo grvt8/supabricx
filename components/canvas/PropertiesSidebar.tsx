@@ -40,6 +40,64 @@ export default function PropertiesSidebar({ isOpen, node, onClose, onDelete, onU
 
   // Render specific fields based on node type
   const renderFields = () => {
+    if (node.data.label === "Auth Service" || node.data.label === "Identity Provider") {
+      const providers = [
+        { id: "google", label: "Google Auth", imageSrc: "/google.png" },
+        { id: "microsoft", label: "Microsoft Auth", imageSrc: "/microsoft.png" },
+        { id: "github", label: "Github Auth", imageSrc: "/github.png" },
+      ] as const;
+
+      const selectedProviderId = (formData.authProvider as string) || "google";
+      const selectedProvider = providers.find((p) => p.id === selectedProviderId) || providers[0];
+
+      return (
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-black/70">Auth Type</label>
+            <div className="relative">
+              <select
+                value={selectedProviderId}
+                onChange={(e) => {
+                  const next = providers.find((p) => p.id === e.target.value) || providers[0];
+                  handleChange("authProvider", next.id);
+                  handleChange("authProviderName", next.label);
+                  handleChange("imageSrc", next.imageSrc);
+                }}
+                className="w-full appearance-none bg-canvas-bg border text-black border-black/5 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-orange-400"
+              >
+                {providers.map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {p.label}
+                  </option>
+                ))}
+              </select>
+              <CaretDown className="absolute right-3 top-1/2 -translate-y-1/2 text-black/40" size={14} />
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3 rounded-lg bg-canvas-bg px-3 py-2">
+            <div className="relative h-8 w-8 overflow-hidden rounded-md bg-white">
+              <Image src={selectedProvider.imageSrc} alt={selectedProvider.label} fill className="object-contain" />
+            </div>
+            <div className="flex flex-col">
+              <span className="text-sm font-medium text-black">{selectedProvider.label}</span>
+              <span className="text-xs text-black/50 font-mono">Identity Provider</span>
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-black/70">Role in diagram</label>
+            <textarea
+              value={(formData.role as string) || ""}
+              onChange={(e) => handleChange("role", e.target.value)}
+              placeholder="e.g. Handles user login and token issuance for all services"
+              className="w-full bg-canvas-bg text-black border border-black/5 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-orange-400 resize-none min-h-[96px]"
+            />
+          </div>
+        </div>
+      );
+    }
+
     // Message Broker / Queue specific logic
     if (node.data.label === "Message Queue" || node.data.label === "Pub/Sub Topic") {
       return (
@@ -97,6 +155,16 @@ export default function PropertiesSidebar({ isOpen, node, onClose, onDelete, onU
                   Transient
                 </label>
              </div>
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-black/70">Role in diagram</label>
+            <textarea
+              value={(formData.role as string) || ""}
+              onChange={(e) => handleChange("role", e.target.value)}
+              placeholder="e.g. Buffers jobs and decouples services for reliable async processing"
+              className="w-full bg-canvas-bg text-black border border-black/5 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-orange-400 resize-none min-h-[96px]"
+            />
           </div>
         </div>
       );
