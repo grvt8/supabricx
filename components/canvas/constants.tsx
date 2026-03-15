@@ -89,6 +89,7 @@ export const NODE_CATEGories: NodeCategory[] = [
     items: [
       { label: "Load Balancer", iconName: "Scales", color: "#FF2F9F" },
       { label: "API Gateway", iconName: "Shield", color: "#FF2F9F" },
+      { label: "Payment Gateway", iconName: "Plugs", color: "#FF2F9F" },
       { label: "Microservice", iconName: "Cube", color: "#FF2F9F" },
       { label: "Serverless Function", iconName: "Lightning", color: "#FF2F9F" },
       { label: "Monolith App", iconName: "Browsers", color: "#FF2F9F" },
