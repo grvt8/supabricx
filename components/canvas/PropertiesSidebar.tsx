@@ -1,4 +1,4 @@
-import { Database, X, Trash, CaretDown, CaretRight } from "@phosphor-icons/react";
+import { Database, X, Trash, CaretDown, CaretRight, Sparkle } from "@phosphor-icons/react";
 import { useState, useEffect } from "react";
 import { Node } from "reactflow";
 import { motion } from "framer-motion";
@@ -16,6 +16,7 @@ interface PropertiesSidebarProps {
 export default function PropertiesSidebar({ isOpen, node, onClose, onDelete, onUpdate }: PropertiesSidebarProps) {
   // Local state for form fields
   const [formData, setFormData] = useState<Record<string, unknown>>({});
+  const [openDropdown, setOpenDropdown] = useState<"auth" | "db" | "broker" | null>(null);
 
   // Reset form data when node changes
   useEffect(() => {
@@ -38,6 +39,12 @@ export default function PropertiesSidebar({ isOpen, node, onClose, onDelete, onU
     }
   };
 
+  const StarBadge = () => (
+    <span className="inline-flex items-center justify-center rounded-full bg-mainColor/20 p-1">
+      <Sparkle size={14} weight="fill" className="text-subColor" />
+    </span>
+  );
+
   // Render specific fields based on node type
   const renderFields = () => {
     if (node.data.label === "Auth Service" || node.data.label === "Identity Provider") {
@@ -55,42 +62,168 @@ export default function PropertiesSidebar({ isOpen, node, onClose, onDelete, onU
           <div className="space-y-2">
             <label className="text-sm font-medium text-black/70">Auth Type</label>
             <div className="relative">
-              <select
-                value={selectedProviderId}
-                onChange={(e) => {
-                  const next = providers.find((p) => p.id === e.target.value) || providers[0];
-                  handleChange("authProvider", next.id);
-                  handleChange("authProviderName", next.label);
-                  handleChange("imageSrc", next.imageSrc);
-                }}
-                className="w-full appearance-none bg-canvas-bg border text-black border-black/5 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-orange-400"
+              <button
+                type="button"
+                onClick={() => setOpenDropdown(openDropdown === "auth" ? null : "auth")}
+                className="w-full flex items-center justify-between bg-canvas-bg border border-black/5 rounded-lg px-3 py-2 text-sm text-black focus:outline-none focus:border-orange-400"
               >
-                {providers.map((p) => (
-                  <option key={p.id} value={p.id}>
-                    {p.label}
-                  </option>
-                ))}
-              </select>
-              <CaretDown className="absolute right-3 top-1/2 -translate-y-1/2 text-black/40" size={14} />
-            </div>
-          </div>
+                <span className="flex items-center gap-2">
+                  <Image src={selectedProvider.imageSrc} alt={selectedProvider.label} width={18} height={18} className="object-contain" />
+                  <span>{selectedProvider.label}</span>
+                </span>
+                <CaretDown className="text-black/40" size={14} />
+              </button>
 
-          <div className="flex items-center gap-3 rounded-lg bg-canvas-bg px-3 py-2">
-            <div className="relative h-8 w-8 overflow-hidden rounded-md bg-white">
-              <Image src={selectedProvider.imageSrc} alt={selectedProvider.label} fill className="object-contain" />
-            </div>
-            <div className="flex flex-col">
-              <span className="text-sm font-medium text-black">{selectedProvider.label}</span>
-              <span className="text-xs text-black/50 font-mono">Identity Provider</span>
+              {openDropdown === "auth" && (
+                <div className="absolute z-50 mt-2 w-full overflow-hidden rounded-lg bg-white shadow-lg border border-black/5">
+                  {providers.map((p) => (
+                    <button
+                      key={p.id}
+                      type="button"
+                      onClick={() => {
+                        handleChange("authProvider", p.id);
+                        handleChange("authProviderName", p.label);
+                        handleChange("imageSrc", p.imageSrc);
+                        setOpenDropdown(null);
+                      }}
+                      className="w-full flex items-center gap-2 px-3 py-2 text-sm text-black hover:bg-canvas-bg transition-colors"
+                    >
+                      <Image src={p.imageSrc} alt={p.label} width={18} height={18} className="object-contain" />
+                      <span>{p.label}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-medium text-black/70">Role in diagram</label>
+            <label className="flex items-center gap-2 text-sm font-medium text-black/70">
+              Role in diagram
+              <StarBadge />
+            </label>
             <textarea
               value={(formData.role as string) || ""}
               onChange={(e) => handleChange("role", e.target.value)}
               placeholder="e.g. Handles user login and token issuance for all services"
+              className="w-full bg-canvas-bg text-black border border-black/5 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-orange-400 resize-none min-h-[96px]"
+            />
+          </div>
+        </div>
+      );
+    }
+
+    const isDbNode =
+      node.data.label === "Relational DB" ||
+      node.data.label === "NoSQL DB" ||
+      node.data.label === "Cache" ||
+      node.data.label === "Object Storage" ||
+      node.data.type === "PostgreSQL" ||
+      node.data.type === "Redis";
+
+    if (isDbNode) {
+      const dbCategory =
+        node.data.label === "Cache" || node.data.type === "Redis"
+          ? "cache"
+          : node.data.label === "Object Storage"
+            ? "object-storage"
+            : node.data.label === "NoSQL DB"
+              ? "nosql"
+              : "relational";
+
+      const dbOptions =
+        dbCategory === "cache"
+          ? ([
+              { id: "redis", label: "Redis", imageSrc: "/redis.png", type: "Redis" },
+            ] as const)
+          : dbCategory === "relational"
+            ? ([
+                { id: "postgresql", label: "PostgreSQL", imageSrc: "/postgresql.png", type: "PostgreSQL" },
+                { id: "mysql", label: "MySQL", imageSrc: "/mysql.png", type: "MySQL" },
+                { id: "sqlserver", label: "SQL Server", imageSrc: "/sqlserver.png", type: "SQL Server" },
+              ] as const)
+            : dbCategory === "nosql"
+              ? ([  
+                  { id: "mongodb", label: "MongoDB", imageSrc: "/mongodb.png", type: "MongoDB" },
+                  { id: "dynamodb", label: "DynamoDB", imageSrc: "/dynamodb.png", type: "DynamoDB" },
+                  { id: "cassandra", label: "Cassandra", imageSrc: "/cassandradb.png", type: "Cassandra" },
+                ] as const)
+              : ([
+                  { id: "s3", label: "Amazon S3", imageSrc: "/logo.png", type: "S3" },
+                  { id: "gcs", label: "Google Cloud Storage", imageSrc: "/logo.png", type: "GCS" },
+                  { id: "azure-blob", label: "Azure Blob Storage", imageSrc: "/logo.png", type: "Azure Blob" },
+                ] as const);
+
+      const selectedDbId =
+        (formData.dbProvider as string) ||
+        (node.data.type === "Redis"
+          ? "redis"
+          : node.data.type === "PostgreSQL"
+            ? "postgresql"
+            : dbCategory === "cache"
+              ? "redis"
+              : "postgresql");
+
+      const selectedDb = dbOptions.find((d) => d.id === selectedDbId) || dbOptions[0];
+
+      const defaultRole =
+        dbCategory === "cache"
+          ? "Caches hot data and reduces database load for faster reads."
+          : dbCategory === "object-storage"
+            ? "Stores files and large blobs used by services (uploads, exports, media)."
+            : dbCategory === "nosql"
+              ? "Persists flexible, high-throughput data with horizontal scaling."
+              : "Stores normalized, transactional data and ensures strong consistency.";
+
+      return (
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-black/70">Database Type</label>
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => setOpenDropdown(openDropdown === "db" ? null : "db")}
+                className="w-full flex items-center justify-between bg-canvas-bg border border-black/5 rounded-lg px-3 py-2 text-sm text-black focus:outline-none focus:border-orange-400"
+              >
+                <span className="flex items-center gap-2">
+                  <Image src={selectedDb.imageSrc} alt={selectedDb.label} width={18} height={18} className="object-contain" />
+                  <span>{selectedDb.label}</span>
+                </span>
+                <CaretDown className="text-black/40" size={14} />
+              </button>
+
+              {openDropdown === "db" && (
+                <div className="absolute z-50 mt-2 w-full overflow-hidden rounded-lg bg-white shadow-lg border border-black/5">
+                  {dbOptions.map((d) => (
+                    <button
+                      key={d.id}
+                      type="button"
+                      onClick={() => {
+                        handleChange("dbProvider", d.id);
+                        handleChange("dbProviderName", d.label);
+                        handleChange("type", d.type);
+                        handleChange("imageSrc", d.imageSrc);
+                        setOpenDropdown(null);
+                      }}
+                      className="w-full flex items-center gap-2 px-3 py-2 text-sm text-black hover:bg-canvas-bg transition-colors"
+                    >
+                      <Image src={d.imageSrc} alt={d.label} width={18} height={18} className="object-contain" />
+                      <span>{d.label}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <label className="flex items-center gap-2 text-sm font-medium text-black/70">
+              Role in diagram
+              <StarBadge />
+            </label>
+            <textarea
+              value={((formData.role as string) || "").trim().length > 0 ? (formData.role as string) : defaultRole}
+              onChange={(e) => handleChange("role", e.target.value)}
               className="w-full bg-canvas-bg text-black border border-black/5 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-orange-400 resize-none min-h-[96px]"
             />
           </div>
@@ -158,7 +291,10 @@ export default function PropertiesSidebar({ isOpen, node, onClose, onDelete, onU
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-medium text-black/70">Role in diagram</label>
+            <label className="flex items-center gap-2 text-sm font-medium text-black/70">
+              Role in diagram
+              <StarBadge />
+            </label>
             <textarea
               value={(formData.role as string) || ""}
               onChange={(e) => handleChange("role", e.target.value)}
