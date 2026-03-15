@@ -87,7 +87,7 @@ export default function Pricing() {
             `}
           >
             {plan.popular && (
-              <div className="absolute top-6 right-6 px-3 py-1 rounded-full border border-[#F85E00] bg-[#FFB563] text-[#F85E00] text-xs font-medium flex items-center gap-1.5">
+              <div className="absolute top-6 right-6 px-3 py-1 rounded-full bg-mainColor/30 text-mainColor text-xs font-medium flex items-center gap-1.5">
                 <Sparkle weight="fill" />
                 Popular
               </div>

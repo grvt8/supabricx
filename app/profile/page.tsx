@@ -49,12 +49,12 @@ function StatCard({ title, value, description, icon }: StatCardProps) {
 
 export default function ProfilePage() {
   const user = {
-    displayName: "danielzfega",
+    displayName: "404khai",
     dayCount: 97,
-    badges: ["Guru", "Single-Model BFF", "Evening Coder"],
+    badges: ["System Architect", "First Brick", "Early Bird", "AI Collaborator"],
     avatarSrc: "/user.jpeg",
-    email: "danielzfega@supabricx.dev",
-    github: "danielzfega",
+    email: "404khai@supabricx.dev",
+    github: "404khai",
     plan: "Pro",
     memberSince: "2025/12/10",
   };
@@ -93,22 +93,22 @@ export default function ProfilePage() {
             </div>
 
             <div className="relative shrink-0">
-              <div className="relative h-28 w-28 overflow-hidden rounded-2xl bg-canvas-bg border-[3px] border-blue-500/80 shadow-sm">
-                {user.avatarSrc ? (
-                  <Image src={user.avatarSrc} alt={`${user.displayName} avatar`} fill className="object-cover" />
-                ) : (
-                  <div className="h-full w-full flex items-center justify-center bg-gradient-to-br from-blue-500/10 to-transparent">
-                    <UserCircle size={48} className="text-blue-500" />
-                  </div>
-                )}
-              </div>
-              <div className="absolute -bottom-1.5 -right-1.5 h-5 w-5 rounded-full bg-green-500 ring-4 ring-foreground" />
-              <button
-                type="button"
-                className="absolute top-2 right-2 rounded-lg bg-white/90 px-2 py-2 text-black hover:bg-white transition-colors"
+              <div
+                className="p-[5px] rounded-2xl"
+                style={{ background: "conic-gradient(#FFB563 0deg 90deg, #F85E00 90deg 270deg, #FBBC05 270deg 360deg)" }}
               >
-                <Camera size={16} />
-              </button>
+                <div className="relative h-28 w-28 overflow-hidden rounded-2xl bg-white shadow-sm">
+                  {user.avatarSrc ? (
+                    <Image src={user.avatarSrc} alt={`${user.displayName} avatar`} fill className="object-cover" />
+                  ) : (
+                    <div className="h-full w-full flex items-center justify-center bg-gradient-to-br from-blue-500/10 to-transparent">
+                      <UserCircle size={48} className="text-blue-500" />
+                    </div>
+                  )}
+                </div>
+              </div>
+              <div className="absolute -bottom-1.5 -right-1.5 h-4 w-4 rounded-full bg-green-500 ring-4 ring-foreground" />
+              
             </div>
           </div>
 
@@ -171,7 +171,7 @@ export default function ProfilePage() {
               <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
               {[
                 {
-                  title: "AI Code Accepted",
+                  title: "AI Diagrams",
                   value: "393",
                   sub: "Across all sessions",
                   bar: "w-[78%]",
@@ -187,7 +187,7 @@ export default function ProfilePage() {
                 {
                   title: "Conversations",
                   value: "46",
-                  sub: "Created with @Builder",
+                  sub: "Created with @Bricx",
                   bar: "w-[62%]",
                   barColor: "bg-subColor/70",
                 },

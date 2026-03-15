@@ -39,7 +39,7 @@ export default function UsagePage() {
                   <Info size={16} className="text-black/40" />
                 </span>
               </div>
-              <button className="px-4 py-2 bg-gradient-to-r from-orange-400 to-orange-500 text-white rounded-lg font-display text-sm font-medium hover:opacity-90 transition-opacity">
+              <button className="px-4 py-2 bg-subColor text-white rounded-lg font-display text-sm font-medium hover:opacity-90 transition-opacity">
                 Upgrade Plan
               </button>
             </div>
@@ -67,7 +67,7 @@ export default function UsagePage() {
 
               <div className="flex items-center justify-between font-mono text-sm">
                 <div>
-                  <span className="text-black font-semibold">420</span>
+                  <span className="text-black font-semibold">275</span>
                   <span className="text-black/50"> / 500 credits used</span>
                 </div>
                 <div className="text-black/50">Resets at 2026/03/29 14:55</div>

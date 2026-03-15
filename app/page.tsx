@@ -4,9 +4,11 @@ import Features from "@/components/landing/Features";
 import Pricing from "@/components/landing/Pricing";
 import Footer from "@/components/Footer";
 import Button from "./components/Button";
-import { ArrowUpRight } from "@phosphor-icons/react";
+import { ArrowUpRight, Lego, Wall } from "@phosphor-icons/react";
 import { useRouter } from "next/navigation";
 import BentoGrid from "@/components/landing/BentoGrid";
+import DeploymentTerminal from "@/components/landing/DeploymentTerminal";
+import CanvasDemo from "@/components/landing/CanvasDemo";
 
 
 export default function Home() {
@@ -20,9 +22,13 @@ export default function Home() {
           
             <div className="flex flex-col items-center gap-8 md:gap-10">
               <div className="flex flex-col items-center gap-4 text-center">
-                <span className="rounded-full border px-4 py-1 text-xs font-medium tracking-wide">
-                  Build systems brick by brick at supa speed
+                <div className="flex items-center gap-2">
+                  <Lego className="w-12 h-12" />
+                  <span className="bg-mainColor px-4 py-1 text-xs font-medium tracking-wide">
+                  The collaborative Agentic Architecture Design Tool for devs
                 </span>
+                </div>
+                
                 <div className="space-y-3">
                   <h1 className="text-2xl font-semibold sm:text-3xl md:text-5xl">
                     Build something with{" "}
@@ -30,7 +36,7 @@ export default function Home() {
                       Supabricx
                     </span>
                   </h1>
-                  <p className="max-w-2xl text-sm text-zinc-400 md:text-base">
+                  <p className="max-w-2xl text-sm text-gray-800 md:text-base">
                     Design, validate, and deploy resilient systems with AI-guided architecture. 
                   </p>
                   <Button
@@ -43,6 +49,10 @@ export default function Home() {
                 </div>
               </div>
 
+              {/* Deployment Terminal Animation */}
+              <div className="w-full max-w-4xl mt-8">
+                <CanvasDemo />
+              </div>
               
             </div>
           </section>

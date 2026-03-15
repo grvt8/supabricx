@@ -12,6 +12,9 @@
 
   --color-canvas-bg: #f0f0f0;
   --color-canvas-border: #e5e5e5;
+
+  --color-dark-bg: #0a0a0a;
+
   
   --font-dynapuff: var(--font-dynapuff), sans-serif;
   --font-dm-mono: var(--font-dm-mono), monospace;
@@ -30,5 +33,20 @@ body, p, span, div, a, button, input, textarea, .font-dm-mono {
 .bg-dot-pattern {
   background-image: radial-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px);
   background-size: 32px 32px;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 8px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: #09090b;
+  border-radius: 4px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #262626;
+  border-radius: 4px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #404040;
 }
 
