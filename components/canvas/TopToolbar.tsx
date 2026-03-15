@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { 
   ClockCounterClockwise,
   CaretDown,
@@ -15,6 +16,7 @@ export default function TopToolbar() {
   const [title, setTitle] = useState("Untitled Diagram");
   const [saveStatus] = useState<"saved" | "saving" | "unsaved">("saved");
   const { viewMode, setViewMode } = useViewMode();
+  const router = useRouter();
 
   return (
     <div className="flex h-14 w-full items-center border-b border-canvas-border justify-between bg-foreground backdrop-blur-md px-4 z-50">
@@ -82,17 +84,21 @@ export default function TopToolbar() {
         </div>
 
         {/* User Profile */}
-        <div className="relative p-[2px] rounded-full bg-white">
+        <button
+          type="button"
+          onClick={() => router.push("/settings")}
+          className="relative p-[2px] rounded-full bg-white cursor-pointer"
+        >
           <div className="absolute inset-0 rounded-full" style={{ background: "conic-gradient(#FFB563 0deg 90deg, #F85E00 90deg 270deg, #FBBC05 270deg 360deg)" }} />
           <div className="relative h-10 w-10 rounded-full border-2 border-white bg-white overflow-hidden">
-             <Image 
-               src="/user.jpeg" 
-               alt="User" 
-               fill 
-               className="object-cover"
-             />
+            <Image 
+              src="/user.jpeg" 
+              alt="User" 
+              fill 
+              className="object-cover"
+            />
           </div>
-        </div>
+        </button>
       </div>
     </div>
   );

@@ -1,0 +1,585 @@
+Build a Profile & Activity Dashboard for Supabricx with the following specifications:
+
+## 🎨 DESIGN SYSTEM (Match Supabricx existing codebase)
+
+### Colors
+- Background: `var(--foreground)` (dark base, #0a0a0a)
+- Main Accent: `var(--mainColor)` (orange gradient, replaces green in reference)
+- Card/Input Background: `var(--canvas-bg)` (#171717)
+- Border: `var(--border-dark)` (#262626)
+- Text Primary: `#ffffff`
+- Text Secondary: `#a3a3a3`
+
+### Typography
+- Headings: Dynapuff (font-display)
+- Body/Numbers: DM Mono (font-mono)
+
+### Icons
+- Phosphor Icons (@phosphor-icons/react)
+
+---
+
+## 📐 PAGE STRUCTURE
+
+### 1. LEFT SIDEBAR NAVIGATION
+```tsx
+<aside className="w-64 bg-foreground border-r border-border-dark p-6">
+  {/* Account Section */}
+  <div className="mb-8">
+    <h3 className="font-mono text-xs text-muted uppercase tracking-wider mb-4">
+      Account
+    </h3>
+    <nav className="space-y-2">
+      <a href="/profile" className="block px-3 py-2 bg-mainColor/20 border border-mainColor/30 rounded-lg font-mono text-sm text-foreground">
+        Profile
+      </a>
+      <a href="/settings" className="block px-3 py-2 hover:bg-canvas-bg rounded-lg font-mono text-sm text-muted hover:text-foreground transition-colors">
+        Settings
+      </a>
+      <a href="/api-keys" className="block px-3 py-2 hover:bg-canvas-bg rounded-lg font-mono text-sm text-muted hover:text-foreground transition-colors">
+        API Keys
+      </a>
+    </nav>
+  </div>
+
+  {/* Subscription Section */}
+  <div className="mb-8">
+    <h3 className="font-mono text-xs text-muted uppercase tracking-wider mb-4">
+      Subscription
+    </h3>
+    <nav className="space-y-2">
+      <a href="/billing" className="block px-3 py-2 hover:bg-canvas-bg rounded-lg font-mono text-sm text-muted hover:text-foreground transition-colors">
+        Plan & Billing
+      </a>
+      <a href="/usage" className="block px-3 py-2 hover:bg-canvas-bg rounded-lg font-mono text-sm text-muted hover:text-foreground transition-colors">
+        Usage
+      </a>
+    </nav>
+  </div>
+
+  {/* Team Section */}
+  <div>
+    <h3 className="font-mono text-xs text-muted uppercase tracking-wider mb-4">
+      Team
+    </h3>
+    <nav className="space-y-2">
+      <a href="/team" className="block px-3 py-2 hover:bg-canvas-bg rounded-lg font-mono text-sm text-muted hover:text-foreground transition-colors">
+        Members
+      </a>
+      <a href="/activity" className="block px-3 py-2 hover:bg-canvas-bg rounded-lg font-mono text-sm text-muted hover:text-foreground transition-colors">
+        Team Activity
+      </a>
+    </nav>
+  </div>
+</aside>
+
+
+MAN CONTENT AREA
+HEADER SECTION
+<div className="flex items-start justify-between mb-8">
+  <div>
+    <h1 className="font-display text-3xl font-bold text-foreground mb-2">
+      Hello! {user.displayName}
+    </h1>
+    <p className="font-mono text-sm text-muted mb-4">
+      This is your day <span className="text-mainColor font-semibold">{user.dayCount}</span> of using Supabricx.
+    </p>
+    
+    {/* Badges/Tags */}
+    <div className="flex gap-2 flex-wrap">
+      {user.badges.map((badge) => (
+        <span 
+          key={badge}
+          className="px-3 py-1 bg-mainColor/20 border border-mainColor/30 rounded-full font-mono text-xs text-mainColor"
+        >
+          # {badge}
+        </span>
+      ))}
+    </div>
+  </div>
+
+  {/* Avatar (Blue Box Area from Reference) */}
+  <div className="relative">
+    <div className="w-32 h-32 rounded-2xl bg-canvas-bg border-2 border-mainColor/50 overflow-hidden">
+      {user.avatar ? (
+        <img 
+          src={user.avatar} 
+          alt={user.displayName}
+          className="w-full h-full object-cover"
+        />
+      ) : (
+        <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-mainColor/20 to-mainColor/10">
+          <User size={48} className="text-mainColor" />
+        </div>
+      )}
+    </div>
+    
+    {/* Status Indicator */}
+    <div className="absolute -bottom-2 -right-2 w-6 h-6 rounded-full bg-green-400 border-4 border-foreground" />
+    
+    {/* Edit Button */}
+    <button className="absolute top-2 right-2 p-2 bg-canvas-bg rounded-lg border border-border-dark hover:border-mainColor/50 transition-colors">
+      <Camera size={16} className="text-muted" />
+    </button>
+  </div>
+</div>
+
+
+Activity Heatmap (GitHub-Style Contribution Graph)
+<div className="bg-canvas-bg border border-border-dark rounded-xl p-6 mb-6">
+  <div className="flex items-center justify-between mb-6">
+    <div className="flex items-center gap-2">
+      <CalendarBlank size={20} className="text-mainColor" />
+      <h2 className="font-display text-lg font-semibold text-foreground">
+        Architecture Activity
+      </h2>
+      <Tooltip content="Days you created or modified diagrams">
+        <Info size={16} className="text-muted" />
+      </Tooltip>
+    </div>
+    
+    {/* Time Range Selector */}
+    <select className="px-3 py-2 bg-background border border-border-dark rounded-lg font-mono text-xs text-foreground">
+      <option>Last 12 months</option>
+      <option>Last 6 months</option>
+      <option>Last 30 days</option>
+    </select>
+  </div>
+
+  {/* Heatmap Grid */}
+  <div className="overflow-x-auto">
+    <div className="min-w-[800px]">
+      {/* Month Labels */}
+      <div className="flex gap-1 mb-2 ml-10">
+        {['Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec', 'Jan', 'Feb', 'Mar'].map((month) => (
+          <span key={month} className="flex-1 text-center font-mono text-xs text-muted">
+            {month}
+          </span>
+        ))}
+      </div>
+
+      {/* Day Labels + Grid */}
+      <div className="flex gap-1">
+        {/* Day Labels (M, W, F) */}
+        <div className="flex flex-col gap-1 mr-2">
+          <div className="h-3" />
+          <div className="h-3 font-mono text-xs text-muted">M</div>
+          <div className="h-3" />
+          <div className="h-3 font-mono text-xs text-muted">W</div>
+          <div className="h-3" />
+          <div className="h-3 font-mono text-xs text-muted">F</div>
+          <div className="h-3" />
+        </div>
+
+        {/* Activity Squares */}
+        <div className="grid grid-cols-52 gap-1">
+          {Array.from({ length: 364 }).map((_, i) => {
+            const activityLevel = Math.floor(Math.random() * 5);
+            return (
+              <Tooltip 
+                key={i}
+                content={`${activityLevel * 3} diagrams on ${new Date().toLocaleDateString()}`}
+              >
+                <div 
+                  className={`w-3 h-3 rounded-sm transition-colors ${
+                    activityLevel === 0 ? 'bg-background' :
+                    activityLevel === 1 ? 'bg-mainColor/30' :
+                    activityLevel === 2 ? 'bg-mainColor/50' :
+                    activityLevel === 3 ? 'bg-mainColor/70' :
+                    'bg-mainColor'
+                  }`}
+                />
+              </Tooltip>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Legend */}
+      <div className="flex items-center justify-end gap-2 mt-4">
+        <span className="font-mono text-xs text-muted">Less</span>
+        <div className="flex gap-1">
+          <div className="w-3 h-3 rounded-sm bg-background" />
+          <div className="w-3 h-3 rounded-sm bg-mainColor/30" />
+          <div className="w-3 h-3 rounded-sm bg-mainColor/50" />
+          <div className="w-3 h-3 rounded-sm bg-mainColor/70" />
+          <div className="w-3 h-3 rounded-sm bg-mainColor" />
+        </div>
+        <span className="font-mono text-xs text-muted">More</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+Stats Row 1: Diagram & AI Metrics
+<div className="grid grid-cols-2 gap-6 mb-6">
+  {/* Diagrams Created */}
+  <div className="bg-canvas-bg border border-border-dark rounded-xl p-6">
+    <div className="flex items-center gap-2 mb-4">
+      <Aperture size={20} className="text-mainColor" />
+      <h3 className="font-display text-sm font-semibold text-foreground">
+        Diagrams Created
+      </h3>
+      <Tooltip content="Total diagrams created this period">
+        <Info size={14} className="text-muted" />
+      </Tooltip>
+    </div>
+    
+    <div className="text-3xl font-display font-bold text-foreground mb-4">
+      {stats.diagramsCreated}
+    </div>
+
+    {/* Breakdown by Type */}
+    <div className="space-y-2">
+      {stats.diagramTypes.map((type) => (
+        <div key={type.name} className="flex items-center gap-2">
+          <div className="w-3 h-3 rounded-sm" style={{ backgroundColor: type.color }} />
+          <span className="font-mono text-xs text-muted flex-1">{type.name}</span>
+          <span className="font-mono text-xs text-foreground">{type.count}</span>
+          <div className="w-32 h-2 bg-background rounded-full overflow-hidden">
+            <div 
+              className="h-full rounded-full" 
+              style={{ 
+                width: `${(type.count / stats.diagramsCreated) * 100}%`,
+                backgroundColor: type.color 
+              }}
+            />
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+
+  {/* AI Generations */}
+  <div className="bg-canvas-bg border border-border-dark rounded-xl p-6">
+    <div className="flex items-center gap-2 mb-4">
+      <Sparkles size={20} className="text-purple-400" />
+      <h3 className="font-display text-sm font-semibold text-foreground">
+        AI Generations
+      </h3>
+      <Tooltip content="AI-powered diagram & code generations">
+        <Info size={14} className="text-muted" />
+      </Tooltip>
+    </div>
+    
+    <div className="text-3xl font-display font-bold text-foreground mb-4">
+      {stats.aiGenerations}
+    </div>
+
+    {/* Breakdown by Model */}
+    <div className="space-y-3">
+      {stats.aiModels.map((model) => (
+        <div key={model.name} className="flex items-center gap-3">
+          <div className="w-8 h-8 rounded-lg bg-background border border-border-dark flex items-center justify-center">
+            {model.icon}
+          </div>
+          <span className="font-mono text-xs text-muted flex-1">{model.name}</span>
+          <span className="font-mono text-xs text-foreground">{model.count}</span>
+          <div className="w-32 h-2 bg-background rounded-full overflow-hidden">
+            <div 
+              className="h-full bg-purple-400 rounded-full" 
+              style={{ width: `${(model.count / stats.aiGenerations) * 100}%` }}
+            />
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+</div>
+
+
+Stats Row 2: Code & Collaboration
+
+<div className="grid grid-cols-3 gap-6 mb-6">
+  {/* Code Exports */}
+  <div className="bg-canvas-bg border border-border-dark rounded-xl p-6">
+    <div className="flex items-center gap-2 mb-4">
+      <Code size={20} className="text-blue-400" />
+      <h3 className="font-display text-sm font-semibold text-foreground">
+        Code Exports
+      </h3>
+    </div>
+    
+    <div className="text-3xl font-display font-bold text-foreground mb-4">
+      {stats.codeExports}
+    </div>
+
+    {/* Export Types */}
+    <div className="space-y-2">
+      {stats.exportTypes.map((type) => (
+        <div key={type} className="flex items-center justify-between">
+          <span className="font-mono text-xs text-muted">{type}</span>
+          <span className="font-mono text-xs text-foreground">
+            {stats.exportCounts[type]}
+          </span>
+        </div>
+      ))}
+    </div>
+  </div>
+
+  {/* Collaborations */}
+  <div className="bg-canvas-bg border border-border-dark rounded-xl p-6">
+    <div className="flex items-center gap-2 mb-4">
+      <Users size={20} className="text-green-400" />
+      <h3 className="font-display text-sm font-semibold text-foreground">
+        Collaborations
+      </h3>
+    </div>
+    
+    <div className="text-3xl font-display font-bold text-foreground mb-4">
+      {stats.collaborations}
+    </div>
+
+    {/* Team Members */}
+    <div className="flex -space-x-2 mb-3">
+      {stats.teamMembers.map((member, i) => (
+        <img 
+          key={i}
+          src={member.avatar}
+          alt={member.name}
+          className="w-8 h-8 rounded-full border-2 border-canvas-bg"
+        />
+      ))}
+      <div className="w-8 h-8 rounded-full border-2 border-canvas-bg bg-background flex items-center justify-center">
+        <span className="font-mono text-xs text-muted">+{stats.teamMembers.length - 3}</span>
+      </div>
+    </div>
+
+    <button className="font-mono text-xs text-mainColor hover:underline">
+      View all teammates
+    </button>
+  </div>
+
+  {/* Credits Used */}
+  <div className="bg-canvas-bg border border-border-dark rounded-xl p-6">
+    <div className="flex items-center gap-2 mb-4">
+      <Zap size={20} className="text-orange-400" />
+      <h3 className="font-display text-sm font-semibold text-foreground">
+        Credits Used
+      </h3>
+    </div>
+    
+    <div className="text-3xl font-display font-bold text-foreground mb-4">
+      {stats.creditsUsed}
+    </div>
+
+    {/* Progress Bar */}
+    <div className="mb-2">
+      <div className="flex justify-between font-mono text-xs text-muted mb-1">
+        <span>{stats.creditsUsed} used</span>
+        <span>{stats.creditsTotal} total</span>
+      </div>
+      <div className="h-2 bg-background rounded-full overflow-hidden">
+        <div 
+          className="h-full bg-gradient-to-r from-orange-400 to-orange-500 rounded-full" 
+          style={{ width: `${(stats.creditsUsed / stats.creditsTotal) * 100}%` }}
+        />
+      </div>
+    </div>
+
+    <button className="font-mono text-xs text-mainColor hover:underline">
+      Upgrade plan
+    </button>
+  </div>
+</div>
+
+Activity Periods Chart (24-Hour Cycle)
+<div className="bg-canvas-bg border border-border-dark rounded-xl p-6">
+  <div className="flex items-center gap-2 mb-6">
+    <Clock size={20} className="text-mainColor" />
+    <h3 className="font-display text-lg font-semibold text-foreground">
+      Architecture Activity Periods
+    </h3>
+    <Tooltip content="When you typically work on diagrams">
+      <Info size={16} className="text-muted" />
+    </Tooltip>
+  </div>
+
+  {/* 24-Hour Arc Chart */}
+  <div className="relative h-48">
+    {/* Arc Path */}
+    <svg className="w-full h-full" viewBox="0 0 400 200">
+      {/* Background Arc */}
+      <path 
+        d="M 50 150 A 150 150 0 0 1 350 150" 
+        fill="none" 
+        stroke="var(--background)" 
+        strokeWidth="4"
+      />
+      
+      {/* Activity Arc */}
+      <path 
+        d="M 50 150 A 150 150 0 0 1 350 150" 
+        fill="none" 
+        stroke="url(#gradient)" 
+        strokeWidth="4"
+        strokeDasharray="10 5"
+      />
+      
+      {/* Gradient Definition */}
+      <defs>
+        <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" stopColor="var(--mainColor)" stopOpacity="0.3" />
+          <stop offset="50%" stopColor="var(--mainColor)" stopOpacity="1" />
+          <stop offset="100%" stopColor="var(--mainColor)" stopOpacity="0.3" />
+        </linearGradient>
+      </defs>
+      
+      {/* Time Labels */}
+      <text x="50" y="175" className="font-mono text-xs fill-muted">06:00</text>
+      <text x="200" y="175" className="font-mono text-xs fill-muted">12:00</text>
+      <text x="350" y="175" className="font-mono text-xs fill-muted">18:00</text>
+      
+      {/* Peak Indicators */}
+      <circle cx="200" cy="50" r="6" fill="var(--mainColor)" />
+      <text x="200" y="40" className="font-mono text-xs fill-mainColor" textAnchor="middle">Peak</text>
+    </svg>
+  </div>
+
+  {/* Stats Below Chart */}
+  <div className="grid grid-cols-3 gap-4 mt-6 pt-6 border-t border-border-dark">
+    <div>
+      <div className="font-mono text-xs text-muted mb-1">Most Active Day</div>
+      <div className="font-display text-lg font-semibold text-foreground">Tuesday</div>
+    </div>
+    <div>
+      <div className="font-mono text-xs text-muted mb-1">Most Active Hour</div>
+      <div className="font-display text-lg font-semibold text-foreground">2:00 PM</div>
+    </div>
+    <div>
+      <div className="font-mono text-xs text-muted mb-1">Avg. Session</div>
+      <div className="font-display text-lg font-semibold text-foreground">47 min</div>
+    </div>
+  </div>
+</div>
+
+Recent Diagrams Section
+<div className="bg-canvas-bg border border-border-dark rounded-xl p-6 mt-6">
+  <div className="flex items-center justify-between mb-6">
+    <div className="flex items-center gap-2">
+      <Aperture size={20} className="text-mainColor" />
+      <h3 className="font-display text-lg font-semibold text-foreground">
+        Recent Diagrams
+      </h3>
+    </div>
+    <button className="font-mono text-xs text-mainColor hover:underline">
+      View all →
+    </button>
+  </div>
+
+  <div className="grid grid-cols-3 gap-4">
+    {recentDiagrams.map((diagram) => (
+      <div 
+        key={diagram.id}
+        className="bg-background border border-border-dark rounded-lg p-4 hover:border-mainColor/50 transition-colors cursor-pointer"
+      >
+        {/* Thumbnail Preview */}
+        <div className="aspect-video bg-canvas-bg rounded mb-3 overflow-hidden">
+          <img 
+            src={diagram.thumbnail} 
+            alt={diagram.name}
+            className="w-full h-full object-cover opacity-80 hover:opacity-100 transition-opacity"
+          />
+        </div>
+        
+        {/* Info */}
+        <div className="font-mono text-sm text-foreground mb-1 truncate">
+          {diagram.name}
+        </div>
+        <div className="font-mono text-xs text-muted mb-2">
+          {diagram.type} • {diagram.lastModified}
+        </div>
+        
+        {/* Tags */}
+        <div className="flex gap-1 flex-wrap">
+          {diagram.tags.map((tag) => (
+            <span 
+              key={tag}
+              className="px-2 py-0.5 bg-mainColor/20 border border-mainColor/30 rounded text-xs font-mono text-mainColor"
+            >
+              {tag}
+            </span>
+          ))}
+        </div>
+      </div>
+    ))}
+  </div>
+</div>
+
+ANIMATIONS AND INTERACTIONS
+// Framer Motion for heatmap squares
+const squareVariants = {
+  hidden: { opacity: 0, scale: 0 },
+  visible: (i: number) => ({
+    opacity: 1,
+    scale: 1,
+    transition: { delay: i * 0.005, duration: 0.2 }
+  })
+};
+
+// Stats card entrance
+const cardVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.4, ease: "easeOut" }
+  }
+};
+
+// Arc chart animation
+const arcVariants = {
+  hidden: { pathLength: 0, opacity: 0 },
+  visible: {
+    pathLength: 1,
+    opacity: 1,
+    transition: { duration: 1.5, ease: "easeInOut" }
+  }
+};
+
+Required Phosphor Icons
+import {
+  User,
+  Camera,
+  CalendarBlank,
+  Info,
+  Aperture,
+  Sparkles,
+  Code,
+  Users,
+  Zap,
+  Clock,
+  ArrowRight
+} from '@phosphor-icons/react'
+
+
+MOCK DATA STRUCTURE
+interface ProfileData {
+  displayName: string;
+  dayCount: number;
+  badges: string[];
+  avatar: string | null;
+}
+
+interface StatsData {
+  diagramsCreated: number;
+  diagramTypes: { name: string; count: number; color: string }[];
+  aiGenerations: number;
+  aiModels: { name: string; count: number; icon: React.ReactNode }[];
+  codeExports: number;
+  exportTypes: string[];
+  exportCounts: Record<string, number>;
+  collaborations: number;
+  teamMembers: { name: string; avatar: string }[];
+  creditsUsed: number;
+  creditsTotal: number;
+}
+
+interface RecentDiagram {
+  id: string;
+  name: string;
+  type: string;
+  thumbnail: string;
+  lastModified: string;
+  tags: string[];
+}
