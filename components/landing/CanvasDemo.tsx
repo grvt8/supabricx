@@ -2,7 +2,28 @@
 
 import Image from "next/image";
 import { motion, useAnimationControls } from "framer-motion";
-import { PaperPlaneTilt, Sparkle, Chats, ClockCounterClockwise} from "@phosphor-icons/react";
+import {
+  ArrowUpRight,
+  HandGrabbing, 
+  Square, 
+  Circle, 
+  TextT,
+  CaretDown,
+  Chat,
+  Chats,
+  CheckCircle,
+  ClockCounterClockwise,
+  CloudCheckIcon,
+  Cursor,
+  FileText,
+  GithubLogo,
+  Link,
+  PaperPlaneTilt,
+  Plus,
+  Sparkle,
+  GearSix,
+  LineVertical,
+} from "@phosphor-icons/react";
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 
 type Point = { x: number; y: number };
@@ -38,12 +59,12 @@ export default function CanvasDemo() {
 
   const cursorControls = useAnimationControls();
   const [anchors, setAnchors] = useState<{ start: Point; input: Point; send: Point } | null>(null);
-  const [typed, setTyped] = useState("");
-  const [isFocused, setIsFocused] = useState(false);
+  const [message, setMessage] = useState("");
   const [submitted, setSubmitted] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [showDiagram, setShowDiagram] = useState(false);
   const [hasRun, setHasRun] = useState(false);
+  const [viewMode, setViewMode] = useState<"document" | "both" | "canvas">("canvas");
 
   const nodes = useMemo<MiniNode[]>(
     () => [
@@ -139,13 +160,12 @@ export default function CanvasDemo() {
         transition: { duration: 0.7, ease: "easeInOut" },
       });
 
-      setIsFocused(true);
       await cursorControls.start({ scale: 0.92, transition: { duration: 0.08 } });
       await cursorControls.start({ scale: 1, transition: { duration: 0.12 } });
 
-      setTyped("");
+      setMessage("");
       for (let i = 1; i <= prompt.length; i += 1) {
-        setTyped(prompt.slice(0, i));
+        setMessage(prompt.slice(0, i));
         await new Promise((r) => setTimeout(r, 14));
       }
 
@@ -158,7 +178,6 @@ export default function CanvasDemo() {
       await cursorControls.start({ scale: 1, transition: { duration: 0.12 } });
 
       setSubmitted(true);
-      setIsFocused(false);
       setIsGenerating(true);
       await new Promise((r) => setTimeout(r, 1800));
       setShowDiagram(true);
@@ -174,7 +193,7 @@ export default function CanvasDemo() {
       ref={containerRef}
       className="relative w-full max-w-5xl mx-auto overflow-hidden rounded-2xl border border-white/10 bg-[#09090b] shadow-[0_30px_80px_rgba(0,0,0,0.18)]"
     >
-      <div className="flex items-center justify-between px-4 py-3 bg-[#0d0e12] backdrop-blur-sm border-b border-white/10">
+      <div className="relative flex items-center justify-between px-4 py-3 bg-[#0d0e12] backdrop-blur-sm border-b border-white/10">
         <div className="flex items-center gap-2">
           <div className="relative w-6 h-6">
             <Image src="/logo.png" alt="Supabricx" fill className="object-contain" />
@@ -182,12 +201,48 @@ export default function CanvasDemo() {
           <span className="font-dynapuff text-white">E-Commerce App</span>
           <span className="ml-2 text-xs text-white/50 font-mono hidden sm:inline">Canvas</span>
         </div>
-        <div className="flex items-center gap-2">
-          <div className="hidden md:flex items-center gap-2 text-xs text-white/50 font-mono">
-            <span className="px-2 py-1 rounded-full bg-white/5">Document</span>
-            <span className="px-2 py-1 rounded-full bg-white/5">Canvas</span>
-            <span className="px-2 py-1 rounded-full bg-white/5">AI</span>
+        <div className="absolute left-1/2 -translate-x-1/2 flex items-center bg-mainColor/10 rounded-lg p-1 border border-subColor/10">
+          {[
+            { id: "document", label: "Document" },
+            { id: "both", label: "Both" },
+            { id: "canvas", label: "Canvas" },
+          ].map((mode) => (
+            <button
+              key={mode.id}
+              onClick={() => setViewMode(mode.id as "document" | "both" | "canvas")}
+              className={`
+                px-4 py-1.5 rounded-md text-sm font-medium transition-all
+                ${viewMode === mode.id
+                  ? "bg-mainColor text-white shadow-sm"
+                  : "text-muted hover:text-black hover:bg-black/5"
+                }
+              `}
+            >
+              {mode.label}
+            </button>
+          ))}
+        </div>
+
+        <div className="flex items-center gap-4">
+          <button className="p-2 hover:bg-black/5 rounded-full text-gray-200 transition-colors">
+            <ClockCounterClockwise size={24} />
+          </button>
+
+          <button className="p-2 hover:bg-black/5 rounded-full text-gray-200 transition-colors">
+            <CloudCheckIcon size={24} />
+          </button>
+
+          <div className="flex items-center h-10 bg-mainColor hover:bg-mainColor/50 text-[#351300] rounded-full pl-4 pr-2 cursor-pointer transition-colors">
+            <div className="flex items-center gap-2 pr-3">
+              <Link size={20} />
+              <span className="font-semibold text-sm">Share</span>
+            </div>
+            <div className="h-full w-px bg-subColor" />
+            <button className="pl-2 h-full flex items-center justify-center">
+              <CaretDown size={16} weight="bold" />
+            </button>
           </div>
+
           <div className="w-8 h-8 rounded-full bg-white border border-white/10 overflow-hidden relative">
             <Image src="/user.jpeg" alt="User" fill className="object-cover" />
           </div>
@@ -196,11 +251,30 @@ export default function CanvasDemo() {
 
       <div className="relative flex h-[520px]">
         <div className="w-14 shrink-0 bg-[#0d0e12] backdrop-blur-sm border-r border-white/10 flex flex-col items-center gap-3 py-4">
-          {["select", "insert", "connect", "comment", "video"].map((k) => (
-            <div
-              key={k}
-              className="h-9 w-9 rounded-xl bg-white/10 border border-white/10"
-            />
+          {[
+            { id: "select", icon: Cursor },
+            { id: "move", icon: HandGrabbing },
+            { id: "insert", icon: Plus },
+            { id: "connect", icon: LineVertical },
+            { id: "rectangle", icon: Square },
+            { id: "circle", icon: Circle },
+            { id: "text", icon: TextT },
+            { id: "comment", icon: Chats },
+            { id: "settngs", icon: GearSix },
+          ].map((t, idx) => (
+            <button
+              key={t.id}
+              type="button"
+              className={[
+                "h-9 w-9 rounded-xl border flex items-center justify-center transition-colors",
+                idx === 0
+                  ? "bg-mainColor/20 border-mainColor/30 text-mainColor"
+                  : "bg-white/5 border-white/10 text-white/70 hover:text-white hover:bg-white/10",
+              ].join(" ")}
+              aria-label={t.id}
+            >
+              <t.icon size={18} weight={idx === 0 ? "fill" : "regular"} />
+            </button>
           ))}
         </div>
 
@@ -312,78 +386,128 @@ export default function CanvasDemo() {
               <div className="relative w-6 h-6">
                 <Image src="/logo.png" alt="Bricx" fill className="object-contain" />
               </div>
-              <span className="font-dynapuff text-white">Bricx</span>
+              <span className="text-white">Bricx</span>
             </div>
-            <ClockCounterClockwise size={16} color="#ffffff" />
-            <Chats size={16} color="#ffffff" />
-        
+
+            <div className="flex items-center gap-1">
+              <button className="p-1.5 hover:bg-border-dark rounded text-muted hover:text-foreground transition-colors" title="History">
+                <ClockCounterClockwise size={18} />
+              </button>
+              <button className="p-1.5 hover:bg-border-dark rounded text-muted hover:text-foreground transition-colors" title="New Chat">
+                <Chats size={18} />
+              </button>
+            </div>
           </div>
 
-          <div className="flex-1 overflow-hidden p-4">
-            {!submitted ? (
-              <div className="h-full rounded-2xl border border-white/10 bg-[var(--color-background)] p-4 flex items-center justify-center text-sm text-white/60 font-mono text-center">
-                Ask Supabricx to generate an architecture diagram.
-              </div>
-            ) : (
-              <div className="flex flex-col gap-3 h-full">
-                <div className="flex justify-end">
-                  <div className="max-w-[260px] rounded-2xl bg-subColor text-white px-3 py-2 text-sm font-mono">
-                    {prompt}
+          <div className="flex-1 overflow-y-auto p-4 scrollbar-thin scrollbar-thumb-border-dark scrollbar-track-transparent">
+            {message.length === 0 ? (
+              <div className="flex flex-col items-center justify-center h-full gap-10">
+                <div className="flex flex-col items-center gap-4">
+                  <div className="relative w-20 h-20 rounded-full bg-orange-500/10 flex items-center justify-center">
+                    <Image src="/logo.png" alt="Supabricx AI" fill className="object-contain" />
+                  </div>
+                  <div className="text-center">
+                    <div className="text-xl font-display font-medium text-white">
+                      Work with <span className="text-subColor">Supabricx</span>
+                    </div>
+                    <p className="mt-2 text-sm text-white/60 font-mono max-w-[320px]">
+                      Generate architecture diagrams, refine system designs, and turn requirements into deployable blueprints.
+                    </p>
                   </div>
                 </div>
-                <div className="flex justify-start">
-                  <motion.div
-                    initial={{ opacity: 0, y: 8 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.25 }}
-                    className="max-w-[280px] rounded-2xl bg-white border border-white/10 px-3 py-2 text-sm font-mono text-white"
-                  >
-                    Generating diagram…
-                  </motion.div>
+
+                <div className="w-full max-w-[340px]">
+                  <div className="text-sm font-dm-mono font-medium text-white/70 mb-3">Past Conversations</div>
+
+                  <div className="flex flex-col gap-2">
+                    {[{ title: "Generate a SaaS microservices architecture", meta: "Today" }].map((item) => (
+                      <button
+                        key={item.title}
+                        className="w-full flex items-center justify-between gap-3 rounded-xl bg-canvas-bg/70 hover:bg-canvas-bg transition-colors px-4 py-3"
+                      >
+                        <div className="flex items-center gap-3 min-w-0">
+                          <div className="h-8 w-8 rounded-lg flex items-center justify-center shrink-0">
+                            <Chat size={20} className="text-subColor" weight="fill" />
+                          </div>
+                          <span className="text-sm text-white/70 truncate font-display">{item.title}</span>
+                        </div>
+                        <span className="text-xs text-white/40 shrink-0 font-mono">{item.meta}</span>
+                      </button>
+                    ))}
+                  </div>
                 </div>
+              </div>
+            ) : (
+              <div className="flex flex-col gap-2">
+                {submitted && (
+                  <>
+                    <div className="flex justify-end">
+                      <div className="max-w-[280px] rounded-2xl bg-subColor text-white px-3 py-2 text-sm font-mono">
+                        {prompt}
+                      </div>
+                    </div>
+                    <div className="flex justify-start">
+                      <motion.div
+                        initial={{ opacity: 0, y: 8 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.25 }}
+                        className="max-w-[280px] rounded-2xl bg-white border border-black/10 px-3 py-2 text-sm font-mono text-black"
+                      >
+                        Generating diagram…
+                      </motion.div>
+                    </div>
+                  </>
+                )}
               </div>
             )}
           </div>
 
           <div className="p-4 pt-0">
-            <div
-              className={[
-                "rounded-2xl border bg-[var(--color-background)] p-3",
-                isFocused ? "border-subColor/40 shadow-[0_0_0_4px_rgba(248,94,0,0.12)]" : "border-white/10",
-              ].join(" ")}
-            >
+            <div className="relative bg-[#1a1a1a] rounded-2xl p-2">
               <textarea
                 ref={inputRef}
-                value={typed}
-                readOnly
-                rows={3}
-                className="w-full resize-none bg-transparent text-sm font-mono text-white placeholder:text-white/40 focus:outline-none"
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
                 placeholder="Describe your architecture..."
+                className="w-full bg-transparent pl-3 pr-12 text-sm font-mono text-white placeholder:text-muted focus:outline-none resize-none min-h-[40px]"
               />
-              <div className="mt-2 flex items-center justify-between">
-                <div className="text-xs text-white/40 font-mono">{typed.length} chars</div>
+
+              <div className="flex items-center justify-between px-2 pb-1">
+                <div className="flex items-center gap-2">
+                  <button className="p-1.5 hover:bg-black/5 rounded-lg text-muted hover:text-foreground transition-colors">
+                    <FileText size={18} />
+                  </button>
+                  <button className="p-1.5 hover:bg-black/5 rounded-lg text-muted hover:text-foreground transition-colors">
+                    <GithubLogo size={18} />
+                  </button>
+                </div>
+
                 <button
                   ref={sendRef}
+                  className="p-2 bg-subColor rounded-xl text-white hover:opacity-90 transition-opacity disabled:opacity-50"
+                  disabled={!message.trim()}
                   type="button"
-                  className="h-9 w-9 rounded-xl bg-subColor text-white flex items-center justify-center shadow-sm"
                 >
                   <PaperPlaneTilt size={16} weight="bold" />
                 </button>
               </div>
             </div>
+            
           </div>
         </div>
 
         <motion.div
           initial={{ opacity: 0 }}
           animate={cursorControls}
-          className="pointer-events-none absolute left-0 top-0 z-50 text-white"
+          className="pointer-events-none absolute left-0 top-0 z-50"
           style={{ x: 0, y: 0 }}
         >
           <div className="relative">
-            <CursorPointer className="h-7 w-7 drop-shadow-[0_10px_18px_rgba(0,0,0,0.25)]" />
+            <div className="rounded-lg bg-foreground border border-black/10 p-1 shadow-[0_14px_30px_rgba(0,0,0,0.35)] text-black">
+              <CursorPointer className="h-7 w-7 drop-shadow-[0_10px_18px_rgba(0,0,0,0.25)]" />
+            </div>
             <motion.div
-              className="absolute -right-7 -top-7 h-5 w-5 rounded-full bg-subColor/30"
+              className="absolute -right-7 -top-7 h-5 w-5 rounded-full bg-mainColor/20 border border-mainColor/30"
               animate={{ scale: [0.85, 1.15, 0.85], opacity: [0.5, 0.9, 0.5] }}
               transition={{ duration: 1.2, repeat: Infinity, ease: "easeInOut" }}
             />
