@@ -5,6 +5,7 @@ import { ArrowUpRight, GithubLogo } from "@phosphor-icons/react";
 import Button from "./Button";
 import ChatInterface from "./ChatInterface";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 const Navbar = () => {
   const router = useRouter();
@@ -37,10 +38,10 @@ const Navbar = () => {
   return (
     <>
       <nav className="sticky top-0 z-30 h-20 p-4 text-black flex justify-between md:justify-around items-center cursor-pointer bg-[#ffead1]">
-        <div className="flex justify-center items-center h-full w-fit gap-2">
+        <Link href="/" className="flex justify-center items-center h-full w-fit gap-2">
           <Image src="/logo.png" alt="Logo" className="h-10 w-10 md:h-15 md:w-15" width={100} height={10} />
           <p className="text-xl md:text-2xl font-dynapuff">Supabricx</p>
-        </div>
+        </Link>
         <div className="hidden md:flex justify-evenly items-center h-full w-100 bg-[#E6D2BC] backdrop-blur-md border border-white/10">
           <p className="font-dynapuff">Docs</p>
           <p className="font-dynapuff">Changelog</p>
@@ -51,11 +52,11 @@ const Navbar = () => {
           
           <div className="hidden md:block">
             <Button
-              title="Open Workspace"
+              title="Open App"
               Icon={ArrowUpRight}
               width="220px"
               height="h-11"
-              onClick={() => router.push('/workspace')}
+              onClick={() => router.push('/projects')}
             />
           </div>
 
