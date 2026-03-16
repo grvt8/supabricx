@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { motion, useAnimationControls } from "framer-motion";
 import {
-  ArrowUpRight,
+  User,
   HandGrabbing, 
   Square, 
   Circle, 
@@ -11,7 +11,12 @@ import {
   CaretDown,
   Chat,
   Chats,
-  CheckCircle,
+  MapPin,
+  Package,
+  Receipt,
+  ClipboardText, 
+  CreditCard,
+  Truck,
   ClockCounterClockwise,
   CloudCheckIcon,
   Cursor,
@@ -28,6 +33,32 @@ import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 
 type Point = { x: number; y: number };
 
+function hexToRgba(hex: string, alpha: number) {
+  const normalized = hex.replace("#", "");
+  const r = parseInt(normalized.slice(0, 2), 16);
+  const g = parseInt(normalized.slice(2, 4), 16);
+  const b = parseInt(normalized.slice(4, 6), 16);
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
+
+function getEntityCardHeight(fieldCount: number) {
+  const header = 44;
+  const row = 22;
+  const padding = 10;
+  return header + fieldCount * row + padding;
+}
+
+function getEntityIcon(id: string, color: string) {
+  if (id === "users") return <User size={20} color={color} />;
+  if (id === "addresses") return <MapPin size={20} color={color} />;
+  if (id === "products") return <Package size={20} color={color} />;
+  if (id === "orders") return <Receipt size={20} color={color} />;
+  if (id === "order_items") return <ClipboardText size={20} color={color} />;
+  if (id === "payments") return <CreditCard size={20} color={color} />;
+  if (id === "shipping") return <Truck size={20} color={color} />;
+  return <Circle size={20} color={color} />;
+}
+
 function CursorPointer({ className }: { className?: string }) {
   return (
     <svg viewBox="0 0 24 24" className={className} aria-hidden="true">
@@ -41,16 +72,22 @@ function CursorPointer({ className }: { className?: string }) {
 
 type MiniNode = {
   id: string;
-  label: string;
-  subtitle?: string;
-  imageSrc?: string;
   color: string;
   x: number;
   y: number;
   w: number;
+  title: string;
+  fields: {
+    name: string;
+    type: string;
+    key?: "PK" | "FK";
+  }[];
 };
 
-const prompt = "Generate an architecture diagram for a basic ecommerce application";
+const prompt = "Generate an ERD for a basic ecommerce application";
+const WORLD_W = 1400;
+const WORLD_H = 1100;
+const SIDEBAR_W = 360;
 
 export default function CanvasDemo() {
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -68,35 +105,159 @@ export default function CanvasDemo() {
 
   const nodes = useMemo<MiniNode[]>(
     () => [
-      { id: "client", label: "Web Client", subtitle: "Storefront", imageSrc: "/globe.svg", color: "#FFB563", x: 110, y: 110, w: 180 },
-      { id: "gateway", label: "API Gateway", subtitle: "Routing + Auth", imageSrc: "/logo.png", color: "#F85E00", x: 410, y: 110, w: 200 },
-
-      { id: "auth", label: "Auth Service", subtitle: "JWT + OAuth", imageSrc: "/google.png", color: "#FF2F9F", x: 220, y: 290, w: 200 },
-      { id: "catalog", label: "Catalog", subtitle: "Products", imageSrc: "/logo.png", color: "#7C3AED", x: 470, y: 290, w: 200 },
-      { id: "cart", label: "Cart", subtitle: "Session state", imageSrc: "/logo.png", color: "#22C55E", x: 720, y: 290, w: 200 },
-
-      { id: "orders", label: "Orders", subtitle: "Checkout", imageSrc: "/logo.png", color: "#06B6D4", x: 360, y: 455, w: 200 },
-      { id: "payments", label: "Payments", subtitle: "Stripe", imageSrc: "/stripe.png", color: "#A3A3A3", x: 610, y: 455, w: 200 },
-
-      { id: "db", label: "PostgreSQL", subtitle: "users + orders", imageSrc: "/postgresql.png", color: "#2FC1FF", x: 250, y: 610, w: 220 },
-      { id: "cache", label: "Redis", subtitle: "cache", imageSrc: "/redis.png", color: "#F97316", x: 560, y: 610, w: 200 },
+      {
+        id: "users",
+        title: "users",
+        color: "#2FC1FF",
+        x: 120,
+        y: 120,
+        w: 250,
+        fields: [
+          { name: "id", type: "uuid", key: "PK" },
+          { name: "email", type: "string" },
+          { name: "password_hash", type: "string" },
+          { name: "first_name", type: "string" },
+          { name: "last_name", type: "string" },
+          { name: "phone", type: "string" },
+          { name: "created_at", type: "timestamp" },
+          { name: "updated_at", type: "timestamp" },
+        ],
+      },
+      {
+        id: "addresses",
+        title: "addresses",
+        color: "#60A5FA",
+        x: 500,
+        y: 160,
+        w: 260,
+        fields: [
+          { name: "id", type: "uuid", key: "PK" },
+          { name: "user_id", type: "uuid", key: "FK" },
+          { name: "type", type: "enum" },
+          { name: "street", type: "string" },
+          { name: "city", type: "string" },
+          { name: "state", type: "string" },
+          { name: "postal_code", type: "string" },
+          { name: "country", type: "string" },
+          { name: "is_default", type: "boolean" },
+        ],
+      },
+      {
+        id: "orders",
+        title: "orders",
+        color: "#F85E00",
+        x: 260,
+        y: 460,
+        w: 300,
+        fields: [
+          { name: "id", type: "uuid", key: "PK" },
+          { name: "user_id", type: "uuid", key: "FK" },
+          { name: "order_number", type: "string" },
+          { name: "status", type: "enum" },
+          { name: "subtotal", type: "decimal" },
+          { name: "tax", type: "decimal" },
+          { name: "shipping_cost", type: "decimal" },
+          { name: "discount", type: "decimal" },
+          { name: "total", type: "decimal" },
+          { name: "currency", type: "string" },
+          { name: "shipping_address", type: "string" },
+          { name: "billing_address", type: "string" },
+          { name: "notes", type: "string" },
+          { name: "created_at", type: "timestamp" },
+          { name: "updated_at", type: "timestamp" },
+        ],
+      },
+      {
+        id: "order_items",
+        title: "order_items",
+        color: "#F59E0B",
+        x: 900,
+        y: 460,
+        w: 300,
+        fields: [
+          { name: "id", type: "uuid", key: "PK" },
+          { name: "order_id", type: "uuid", key: "FK" },
+          { name: "product_id", type: "uuid", key: "FK" },
+          { name: "quantity", type: "int" },
+          { name: "unit_price", type: "decimal" },
+          { name: "total_price", type: "decimal" },
+        ],
+      },
+      {
+        id: "products",
+        title: "products",
+        color: "#22C55E",
+        x: 1040,
+        y: 140,
+        w: 280,
+        fields: [
+          { name: "id", type: "uuid", key: "PK" },
+          { name: "name", type: "string" },
+          { name: "description", type: "string" },
+          { name: "slug", type: "string" },
+          { name: "price", type: "decimal" },
+          { name: "compare_price", type: "decimal" },
+          { name: "cost", type: "decimal" },
+          { name: "sku", type: "string" },
+          { name: "barcode", type: "string" },
+          { name: "inventory_qty", type: "int" },
+          { name: "status", type: "enum" },
+          { name: "created_at", type: "timestamp" },
+          { name: "updated_at", type: "timestamp" },
+        ],
+      },
+      {
+        id: "payments",
+        title: "payments",
+        color: "#FF2F9F",
+        x: 220,
+        y: 860,
+        w: 310,
+        fields: [
+          { name: "id", type: "uuid", key: "PK" },
+          { name: "order_id", type: "uuid", key: "FK" },
+          { name: "user_id", type: "uuid", key: "FK" },
+          { name: "amount", type: "decimal" },
+          { name: "currency", type: "string" },
+          { name: "method", type: "enum" },
+          { name: "status", type: "enum" },
+          { name: "transaction_id", type: "string" },
+          { name: "paid_at", type: "timestamp" },
+          { name: "created_at", type: "timestamp" },
+        ],
+      },
+      {
+        id: "shipping",
+        title: "shipping",
+        color: "#06B6D4",
+        x: 740,
+        y: 860,
+        w: 320,
+        fields: [
+          { name: "id", type: "uuid", key: "PK" },
+          { name: "order_id", type: "uuid", key: "FK" },
+          { name: "carrier", type: "string" },
+          { name: "tracking_number", type: "string" },
+          { name: "method", type: "string" },
+          { name: "status", type: "enum" },
+          { name: "shipped_at", type: "timestamp" },
+          { name: "delivered_at", type: "timestamp" },
+          { name: "estimated_delivery", type: "timestamp" },
+        ],
+      },
     ],
     [],
   );
 
   const edges = useMemo(
     () => [
-      { from: "client", to: "gateway" },
-      { from: "gateway", to: "auth" },
-      { from: "gateway", to: "catalog" },
-      { from: "gateway", to: "cart" },
-      { from: "catalog", to: "cache" },
-      { from: "cart", to: "cache" },
-      { from: "catalog", to: "db" },
-      { from: "auth", to: "db" },
-      { from: "gateway", to: "orders" },
-      { from: "orders", to: "db" },
+      { from: "users", to: "addresses" },
+      { from: "users", to: "orders" },
+      { from: "users", to: "payments" },
+      { from: "orders", to: "order_items" },
+      { from: "products", to: "order_items" },
       { from: "orders", to: "payments" },
+      { from: "orders", to: "shipping" },
     ],
     [],
   );
@@ -278,238 +439,293 @@ export default function CanvasDemo() {
           ))}
         </div>
 
-        <div className="relative flex-1 bg-[#1a1a1a]  overflow-hidden">
-          <div
-            className="absolute inset-0 opacity-90"
-            style={{
-              backgroundImage: "radial-gradient(rgba(255,255,255,0.20) 1px, transparent 1px)",
-              backgroundSize: "28px 28px",
-            }}
-          />
-
-          <svg
-            viewBox="0 0 1000 760"
-            className="absolute inset-0 h-full w-full"
-            preserveAspectRatio="none"
-          >
-            {showDiagram &&
-              edges.map((e) => {
-                const from = nodes.find((n) => n.id === e.from);
-                const to = nodes.find((n) => n.id === e.to);
-                if (!from || !to) return null;
-                const x1 = from.x + from.w / 2;
-                const y1 = from.y + 38;
-                const x2 = to.x + to.w / 2;
-                const y2 = to.y + 38;
-                return (
-                  <motion.line
-                    key={`${e.from}-${e.to}`}
-                    x1={x1}
-                    y1={y1}
-                    x2={x2}
-                    y2={y2}
-                    stroke="rgba(255,255,255,0.25)"
-                    strokeWidth="2"
-                    strokeDasharray="6 6"
-                    initial={{ pathLength: 0, opacity: 0 }}
-                    animate={{ pathLength: 1, opacity: 1 }}
-                    transition={{ duration: 0.55, ease: "easeOut" }}
-                  />
-                );
-              })}
-          </svg>
-
-          {showDiagram &&
-            nodes.map((n, idx) => (
-              <motion.div
-                key={n.id}
-                initial={{ opacity: 0, y: 14, scale: 0.98 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                transition={{ duration: 0.35, delay: idx * 0.06, ease: "easeOut" }}
-                className="absolute"
+        <div className="relative flex-1 bg-[#1a1a1a] overflow-hidden">
+          <div className="absolute inset-0 overflow-auto">
+            <div className="relative" style={{ width: WORLD_W, height: WORLD_H }}>
+              <div
+                className="absolute inset-0 opacity-90"
                 style={{
-                  left: `${(n.x / 1000) * 100}%`,
-                  top: `${(n.y / 760) * 100}%`,
-                  width: `${(n.w / 1000) * 100}%`,
+                  backgroundImage: "radial-gradient(rgba(255,255,255,0.20) 1px, transparent 1px)",
+                  backgroundSize: "28px 28px",
                 }}
-              >
-                <div className="rounded-2xl bg-white border border-white/10 shadow-sm px-3 py-3 flex items-center gap-3">
-                  <div className="h-10 w-10 rounded-xl border border-white/10 bg-white/5 flex items-center justify-center shrink-0 relative overflow-hidden">
-                    {n.imageSrc ? (
-                      <Image src={n.imageSrc} alt={n.label} fill className="object-contain p-2" />
-                    ) : (
-                      <div className="h-6 w-6 rounded bg-white/10" />
-                    )}
-                  </div>
-                  <div className="min-w-0">
-                    <div className="flex items-center gap-2">
-                      <div className="text-sm font-dynapuff text-white truncate">{n.label}</div>
-                      <span className="h-2 w-2 rounded-full" style={{ background: n.color }} />
-                    </div>
-                    {n.subtitle && <div className="text-xs text-white/50 font-mono truncate">{n.subtitle}</div>}
-                  </div>
-                </div>
-              </motion.div>
-            ))}
-
-          {isGenerating && (
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div className="rounded-2xl bg-white/80 backdrop-blur-sm border border-white/10 px-5 py-4 flex items-center gap-3 shadow-lg">
-                <motion.div
-                  animate={{ scale: [1, 1.08, 1] }}
-                  transition={{ duration: 0.9, repeat: Infinity, ease: "easeInOut" }}
-                  className="relative h-9 w-9"
-                >
-                  <Image src="/logo.png" alt="Generating" fill className="object-contain" />
-                </motion.div>
-                <div className="flex flex-col">
-                  <div className="text-sm font-dynapuff text-white flex items-center gap-2">
-                    Generating
-                    <motion.span
-                      className="inline-flex"
-                      animate={{ opacity: [0.25, 1, 0.25] }}
-                      transition={{ duration: 1, repeat: Infinity }}
-                    >
-                      <Sparkle size={16} className="text-subColor" weight="fill" />
-                    </motion.span>
-                  </div>
-                  <div className="text-xs text-white/50 font-mono">ecommerce-architecture.json</div>
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
-
-        <div className="w-[360px] shrink-0 bg-[#0d0e12] border-l border-white/10 flex flex-col">
-          <div className="h-14 px-4 flex items-center justify-between border-b border-white/10">
-            <div className="flex items-center gap-2">
-              <div className="relative w-6 h-6">
-                <Image src="/logo.png" alt="Bricx" fill className="object-contain" />
-              </div>
-              <span className="text-white">Bricx</span>
-            </div>
-
-            <div className="flex items-center gap-1">
-              <button className="p-1.5 hover:bg-border-dark rounded text-muted hover:text-foreground transition-colors" title="History">
-                <ClockCounterClockwise size={18} />
-              </button>
-              <button className="p-1.5 hover:bg-border-dark rounded text-muted hover:text-foreground transition-colors" title="New Chat">
-                <Chats size={18} />
-              </button>
-            </div>
-          </div>
-
-          <div className="flex-1 overflow-y-auto p-4 scrollbar-thin scrollbar-thumb-border-dark scrollbar-track-transparent">
-            {message.length === 0 ? (
-              <div className="flex flex-col items-center justify-center h-full gap-10">
-                <div className="flex flex-col items-center gap-4">
-                  <div className="relative w-20 h-20 rounded-full bg-orange-500/10 flex items-center justify-center">
-                    <Image src="/logo.png" alt="Supabricx AI" fill className="object-contain" />
-                  </div>
-                  <div className="text-center">
-                    <div className="text-xl font-display font-medium text-white">
-                      Work with <span className="text-subColor">Supabricx</span>
-                    </div>
-                    <p className="mt-2 text-sm text-white/60 font-mono max-w-[320px]">
-                      Generate architecture diagrams, refine system designs, and turn requirements into deployable blueprints.
-                    </p>
-                  </div>
-                </div>
-
-                <div className="w-full max-w-[340px]">
-                  <div className="text-sm font-dm-mono font-medium text-white/70 mb-3">Past Conversations</div>
-
-                  <div className="flex flex-col gap-2">
-                    {[{ title: "Generate a SaaS microservices architecture", meta: "Today" }].map((item) => (
-                      <button
-                        key={item.title}
-                        className="w-full flex items-center justify-between gap-3 rounded-xl bg-canvas-bg/70 hover:bg-canvas-bg transition-colors px-4 py-3"
-                      >
-                        <div className="flex items-center gap-3 min-w-0">
-                          <div className="h-8 w-8 rounded-lg flex items-center justify-center shrink-0">
-                            <Chat size={20} className="text-subColor" weight="fill" />
-                          </div>
-                          <span className="text-sm text-white/70 truncate font-display">{item.title}</span>
-                        </div>
-                        <span className="text-xs text-white/40 shrink-0 font-mono">{item.meta}</span>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            ) : (
-              <div className="flex flex-col gap-2">
-                {submitted && (
-                  <>
-                    <div className="flex justify-end">
-                      <div className="flex flex-col items-end gap-1 max-w-[320px]">
-                        <div className="flex items-center gap-2">
-                          <div className="relative h-10 w-10 rounded-full overflow-hidden border border-white/10 bg-white/10">
-                            <Image src="/user.jpeg" alt="User" fill className="object-cover" />
-                          </div>
-                          <span className="text-sm font-mono text-mainColor">404khai</span>
-                        </div>
-                        <div className="max-w-[320px] rounded-tl-lg rounded-bl-lg rounded-br-lg bg-mainColor border border-white/10 px-4 py-3 text-sm font-mono text-black">
-                          {prompt}
-                        </div>
-                      </div>
-                    </div>
-                    <div className="flex justify-start">
-                      <motion.div
-                        initial={{ opacity: 0, y: 8 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.25 }}
-                      >
-                        <div className="flex flex-col items-start gap-1 max-w-[340px]">
-                          <div className="flex items-center gap-2">
-                            <div className="relative h-10 w-10 rounded-full overflow-hidden border border-white/10">
-                              <Image src="/logo.png" alt="Bricx" fill className="object-contain p-1.5" />
-                            </div>
-                            <span className="text-sm font-mono text-white/80">Bricx</span>
-                          </div>
-                          <div className="max-w-[340px] rounded-tr-lg rounded-bl-lg rounded-br-lg bg-[#252525] border border-black/10 px-4 py-3 text-sm font-mono text-white/90">
-                            Generating diagram…
-                          </div>
-                        </div>
-                      </motion.div>
-                    </div>
-                  </>
-                )}
-              </div>
-            )}
-          </div>
-
-          <div className="p-4 pt-0">
-            <div className="relative bg-[#1a1a1a] rounded-2xl p-2">
-              <textarea
-                ref={inputRef}
-                value={message}
-                onChange={(e) => setMessage(e.target.value)}
-                placeholder="Describe your architecture..."
-                className="w-full bg-transparent pl-3 pr-12 text-sm font-mono text-white placeholder:text-muted focus:outline-none resize-none min-h-[40px]"
               />
 
-              <div className="flex items-center justify-between px-2 pb-1">
-                <div className="flex items-center gap-2">
-                  <button className="p-1.5 hover:bg-black/5 rounded-lg text-muted hover:text-foreground transition-colors">
-                    <FileText size={18} />
-                  </button>
-                  <button className="p-1.5 hover:bg-black/5 rounded-lg text-muted hover:text-foreground transition-colors">
-                    <GithubLogo size={18} />
-                  </button>
-                </div>
+              <svg
+                viewBox={`0 0 ${WORLD_W} ${WORLD_H}`}
+                className="absolute left-0 top-0"
+                width={WORLD_W}
+                height={WORLD_H}
+                preserveAspectRatio="none"
+              >
+                {showDiagram &&
+                  edges.map((e) => {
+                    const from = nodes.find((n) => n.id === e.from);
+                    const to = nodes.find((n) => n.id === e.to);
+                    if (!from || !to) return null;
 
-                <button
-                  ref={sendRef}
-                  className="p-2 bg-subColor rounded-xl text-white hover:opacity-90 transition-opacity disabled:opacity-50"
-                  disabled={!message.trim()}
-                  type="button"
-                >
-                  <PaperPlaneTilt size={16} weight="bold" />
+                    const fromH = getEntityCardHeight(from.fields.length);
+                    const toH = getEntityCardHeight(to.fields.length);
+
+                    const fromLeft = from.x;
+                    const fromRight = from.x + from.w;
+                    const toLeft = to.x;
+                    const toRight = to.x + to.w;
+
+                    const y1 = from.y + fromH / 2;
+                    const y2 = to.y + toH / 2;
+
+                    let x1 = fromRight;
+                    let x2 = toLeft;
+                    if (toRight <= fromLeft) {
+                      x1 = fromLeft;
+                      x2 = toRight;
+                    } else if (fromRight > toLeft && toRight > fromLeft) {
+                      x1 = from.x + from.w / 2;
+                      x2 = to.x + to.w / 2;
+                    }
+
+                    const dx = x2 - x1;
+                    let midX = x1 + dx / 2;
+                    if (Math.abs(dx) < 120) midX = x1 + (dx >= 0 ? 160 : -160);
+
+                    const d = `M ${x1} ${y1} L ${midX} ${y1} L ${midX} ${y2} L ${x2} ${y2}`;
+
+                    return (
+                      <motion.path
+                        key={`${e.from}-${e.to}`}
+                        d={d}
+                        stroke="rgba(255,255,255,0.25)"
+                        strokeWidth="2"
+                        strokeDasharray="6 6"
+                        fill="none"
+                        initial={{ pathLength: 0, opacity: 0 }}
+                        animate={{ pathLength: 1, opacity: 1 }}
+                        transition={{ duration: 0.55, ease: "easeOut" }}
+                      />
+                    );
+                  })}
+              </svg>
+
+              {showDiagram &&
+                nodes.map((n, idx) => (
+                  <motion.div
+                    key={n.id}
+                    initial={{ opacity: 0, y: 14, scale: 0.98 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    transition={{ duration: 0.35, delay: idx * 0.06, ease: "easeOut" }}
+                    className="absolute"
+                    style={{ left: n.x, top: n.y, width: n.w }}
+                  >
+                    <div
+                      className="rounded-lg bg-white shadow-sm overflow-hidden"
+                      style={{ border: `2px solid ${n.color}` }}
+                    >
+                      <div
+                        className="flex items-center justify-between px-3 py-2"
+                        style={{ backgroundColor: hexToRgba(n.color, 0.12) }}
+                      >
+                        <div className="text-[13px] font-mono font-semibold text-black">{n.title}</div>
+                        <div
+                          className="h-9 w-9 rounded-md flex items-center justify-center"
+                          style={{ backgroundColor: hexToRgba(n.color, 0.2) }}
+                        >
+                          {getEntityIcon(n.id, n.color)}
+                        </div>
+                      </div>
+
+                      <div className="border-t border-black/5">
+                        {n.fields.map((f) => (
+                          <div
+                            key={`${n.id}:${f.name}`}
+                            className="grid grid-cols-[1fr_auto_auto] items-center gap-3 px-3 py-1.5 text-[12px] font-mono"
+                            style={{ borderTop: "1px solid rgba(0,0,0,0.05)" }}
+                          >
+                            <div className="text-black/70 truncate">{f.name}</div>
+                            <div className="text-black/40">{f.type}</div>
+                            <div className="justify-self-end">
+                              {f.key ? (
+                                <span
+                                  className="px-1.5 py-0.5 rounded-md text-[10px] font-mono font-semibold"
+                                  style={{
+                                    backgroundColor: hexToRgba(n.color, 0.18),
+                                    color: "rgba(0,0,0,0.70)",
+                                  }}
+                                >
+                                  {f.key.toLowerCase()}
+                                </span>
+                              ) : (
+                                <span className="w-7" />
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </motion.div>
+                ))}
+
+              {isGenerating && (
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="rounded-2xl bg-[#252525]/70 backdrop-blur-sm border border-white/10 px-5 py-4 flex items-center gap-3 shadow-lg">
+                    <motion.div
+                      animate={{ scale: [1, 1.08, 1] }}
+                      transition={{ duration: 0.9, repeat: Infinity, ease: "easeInOut" }}
+                      className="relative h-9 w-9"
+                    >
+                      <Image src="/logo.png" alt="Generating" fill className="object-contain" />
+                    </motion.div>
+                    <div className="flex flex-col">
+                      <div className="text-sm font-dynapuff text-white flex items-center gap-2">
+                        Generating
+                        <motion.span
+                          className="inline-flex"
+                          animate={{ opacity: [0.25, 1, 0.25] }}
+                          transition={{ duration: 1, repeat: Infinity }}
+                        >
+                          <Sparkle size={16} className="text-subColor" weight="fill" />
+                        </motion.span>
+                      </div>
+                      <div className="text-xs text-white/50 font-mono">ecommerce-ERD.sbx</div>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div
+            className="absolute right-0 top-0 bottom-0 bg-[#0d0e12] border-l border-white/10 flex flex-col z-30"
+            style={{ width: SIDEBAR_W }}
+          >
+            <div className="h-14 px-4 flex items-center justify-between border-b border-white/10">
+              <div className="flex items-center gap-2">
+                <div className="relative w-6 h-6">
+                  <Image src="/logo.png" alt="Bricx" fill className="object-contain" />
+                </div>
+                <span className="text-white">Bricx</span>
+              </div>
+
+              <div className="flex items-center gap-1">
+                <button className="p-1.5 hover:bg-border-dark rounded text-muted hover:text-foreground transition-colors" title="History">
+                  <ClockCounterClockwise size={18} />
+                </button>
+                <button className="p-1.5 hover:bg-border-dark rounded text-muted hover:text-foreground transition-colors" title="New Chat">
+                  <Chats size={18} />
                 </button>
               </div>
             </div>
-            
+
+            <div className="flex-1 overflow-y-auto p-4 scrollbar-thin scrollbar-thumb-border-dark scrollbar-track-transparent">
+              {message.length === 0 ? (
+                <div className="flex flex-col items-center justify-center h-full gap-10">
+                  <div className="flex flex-col items-center gap-4">
+                    <div className="relative w-20 h-20 rounded-full bg-mainColor/20 flex items-center justify-center">
+                      <Image src="/logo.png" alt="Supabricx AI" fill className="object-contain" />
+                    </div>
+                    <div className="text-center">
+                      <div className="text-xl font-display font-medium text-white">
+                        Work with <span className="text-subColor">Supabricx</span>
+                      </div>
+                      <p className="mt-2 text-sm text-white/60 font-mono max-w-[320px]">
+                        Generate architecture diagrams, refine system designs, and turn requirements into deployable blueprints.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="w-full max-w-[340px]">
+                    <div className="text-sm font-dm-mono font-medium text-white/70 mb-3">Past Conversations</div>
+
+                    <div className="flex flex-col gap-2">
+                      {[{ title: "Generate a SaaS microservices architecture", meta: "Today" }].map((item) => (
+                        <button
+                          key={item.title}
+                          className="w-full flex items-center justify-between gap-3 rounded-xl bg-[#252525]/70 hover:bg-[#252525] transition-colors px-4 py-3"
+                        >
+                          <div className="flex items-center gap-3 min-w-0">
+                            <div className="h-8 w-8 rounded-lg flex items-center justify-center shrink-0">
+                              <Chat size={20} className="text-subColor" weight="fill" />
+                            </div>
+                            <span className="text-sm text-white/70 truncate font-display">{item.title}</span>
+                          </div>
+                          <span className="text-xs text-white/40 shrink-0 font-mono">{item.meta}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="flex flex-col gap-2">
+                  {submitted && (
+                    <>
+                      <div className="flex justify-end">
+                        <div className="flex flex-col items-end gap-1 max-w-[320px]">
+                          <div className="flex items-center gap-2">
+                            <div className="relative h-10 w-10 rounded-full overflow-hidden border border-white/10 bg-white/10">
+                              <Image src="/user.jpeg" alt="User" fill className="object-cover" />
+                            </div>
+                            <span className="text-sm font-mono text-mainColor">404khai</span>
+                          </div>
+                          <div className="max-w-[320px] rounded-tl-lg rounded-bl-lg rounded-br-lg bg-mainColor border border-white/10 px-4 py-3 text-sm font-mono text-black">
+                            {prompt}
+                          </div>
+                        </div>
+                      </div>
+                      <div className="flex justify-start">
+                        <motion.div
+                          initial={{ opacity: 0, y: 8 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ duration: 0.25 }}
+                        >
+                          <div className="flex flex-col items-start gap-1 max-w-[340px]">
+                            <div className="flex items-center gap-2">
+                              <div className="relative h-10 w-10 rounded-full overflow-hidden border border-white/10">
+                                <Image src="/logo.png" alt="Bricx" fill className="object-contain p-1.5" />
+                              </div>
+                              <span className="text-sm font-mono text-white/80">Bricx</span>
+                            </div>
+                            <div className="max-w-[340px] rounded-tr-lg rounded-bl-lg rounded-br-lg bg-[#252525] border border-black/10 px-4 py-3 text-sm font-mono text-white/90">
+                              Generating diagram…
+                            </div>
+                          </div>
+                        </motion.div>
+                      </div>
+                    </>
+                  )}
+                </div>
+              )}
+            </div>
+
+            <div className="p-4 pt-0">
+              <div className="relative bg-[#1a1a1a] rounded-2xl p-2">
+                <textarea
+                  ref={inputRef}
+                  value={message}
+                  onChange={(e) => setMessage(e.target.value)}
+                  placeholder="Describe your architecture..."
+                  className="w-full bg-transparent pl-3 pr-12 text-sm font-mono text-white placeholder:text-muted focus:outline-none resize-none min-h-[40px]"
+                />
+
+                <div className="flex items-center justify-between px-2 pb-1">
+                  <div className="flex items-center gap-2">
+                    <button className="p-1.5 hover:bg-black/5 rounded-lg text-muted hover:text-foreground transition-colors">
+                      <FileText size={18} />
+                    </button>
+                    <button className="p-1.5 hover:bg-black/5 rounded-lg text-muted hover:text-foreground transition-colors">
+                      <GithubLogo size={18} />
+                    </button>
+                  </div>
+
+                  <button
+                    ref={sendRef}
+                    className="p-2 bg-subColor rounded-xl text-white hover:opacity-90 transition-opacity disabled:opacity-50"
+                    disabled={!message.trim()}
+                    type="button"
+                  >
+                    <PaperPlaneTilt size={16} weight="bold" />
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -520,14 +736,10 @@ export default function CanvasDemo() {
           style={{ x: 0, y: 0 }}
         >
           <div className="relative">
-            <div className="rounded-lg bg-foreground border border-black/10 p-1 shadow-[0_14px_30px_rgba(0,0,0,0.35)] text-black">
-              <CursorPointer className="h-7 w-7 drop-shadow-[0_10px_18px_rgba(0,0,0,0.25)]" />
+            <div className="rounded-lg bg-transparent p-1 text-white">
+              <CursorPointer className="h-7 w-7 border border-subColor" />
             </div>
-            <motion.div
-              className="absolute -right-7 -top-7 h-5 w-5 rounded-full bg-mainColor/20 border border-mainColor/30"
-              animate={{ scale: [0.85, 1.15, 0.85], opacity: [0.5, 0.9, 0.5] }}
-              transition={{ duration: 1.2, repeat: Infinity, ease: "easeInOut" }}
-            />
+            
           </div>
         </motion.div>
       </div>

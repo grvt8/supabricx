@@ -1,0 +1,148 @@
+CORE ENTITIES (NODES)
+
+Users/Customers
+┌─────────────────┐
+│    users        │
+├─────────────────┤
+│ id          PK  │
+│ email           │
+│ password_hash   │
+│ first_name      │
+│ last_name       │
+│ phone           │
+│ created_at      │
+│ updated_at      │
+└─────────────────┘
+
+Addresses
+┌─────────────────┐
+│   addresses     │
+├─────────────────┤
+│ id          PK  │
+│ user_id     FK  │
+│ type            │ (billing/shipping)
+│ street          │
+│ city            │
+│ state           │
+│ postal_code     │
+│ country         │
+│ is_default      │
+└─────────────────┘
+
+Products
+┌─────────────────┐
+│   products      │
+├─────────────────┤
+│ id          PK  │
+│ name            │
+│ description     │
+│ slug            │
+│ price           │
+│ compare_price   │
+│ cost            │
+│ sku             │
+│ barcode         │
+│ inventory_qty   │
+│ status          │ (active/draft/archived)
+│ created_at      │
+│ updated_at      │
+└─────────────────┘
+
+ORDERS
+┌─────────────────┐
+│    orders       │
+├─────────────────┤
+│ id          PK  │
+│ user_id     FK  │
+│ order_number    │ (unique)
+│ status          │ (pending/processing/shipped/delivered/cancelled)
+│ subtotal        │
+│ tax             │
+│ shipping_cost   │
+│ discount        │
+│ total           │
+│ currency        │
+│ shipping_address│
+│ billing_address │
+│ notes           │
+│ created_at      │
+│ updated_at      │
+└─────────────────┘
+
+ORDER items
+┌─────────────────┐
+│  order_items    │
+├─────────────────┤
+│ id          PK  │
+│ order_id    FK  │
+│ product_id  FK  │
+│ quantity        │
+│ unit_price      │
+│ total_price     │
+└─────────────────┘
+
+payments
+┌─────────────────┐
+│   payments      │
+├─────────────────┤
+│ id          PK  │
+│ order_id    FK  │
+│ user_id     FK  │
+│ amount          │
+│ currency        │
+│ method          │ (credit_card/paypal/stripe/etc)
+│ status          │ (pending/completed/failed/refunded)
+│ transaction_id  │
+│ paid_at         │
+│ created_at      │
+└─────────────────┘
+
+Shipping
+┌─────────────────┐
+│   shipping      │
+├─────────────────┤
+│ id          PK  │
+│ order_id    FK  │
+│ carrier         │
+│ tracking_number │
+│ method          │
+│ status          │
+│ shipped_at      │
+│ delivered_at    │
+│ estimated_delivery│
+└─────────────────┘
+
+VISUAL ERD Layout
+┌─────────────────────────────────────────────────────────────┐
+│                    E-COMMERCE ARCHITECTURE                  │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│  [USERS] ──┬── [ADDRESSES]                                 │
+│            ├── [ORDERS] ──┬── [ORDER_ITEMS] ── [PRODUCTS] │
+│            │              ├── [PAYMENTS]                   │
+│            │              └── [SHIPPING]                   │
+│            │  
+
+
+Entity
+Node Type
+Color
+Users/Customers Database Blue
+Products Database Green
+Orders Database Orange
+Payments Database Pink
+Shipping Database Teal
+
+Key Relationships
+users (1) ────── (M) addresses
+users (1) ────── (M) orders
+
+users (1) ────── (M) payments
+
+
+products (1) ─── (M) order_items
+
+
+orders (1) ───── (M) order_items
+orders (1) ───── (1) payments
+orders (1) ───── (1) shipping
