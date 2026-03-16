@@ -308,7 +308,7 @@ export default function CanvasDemo() {
                     y1={y1}
                     x2={x2}
                     y2={y2}
-                    stroke="rgba(0,0,0,0.25)"
+                    stroke="rgba(255,255,255,0.25)"
                     strokeWidth="2"
                     strokeDasharray="6 6"
                     initial={{ pathLength: 0, opacity: 0 }}
@@ -442,8 +442,16 @@ export default function CanvasDemo() {
                 {submitted && (
                   <>
                     <div className="flex justify-end">
-                      <div className="max-w-[280px] rounded-2xl bg-subColor text-white px-3 py-2 text-sm font-mono">
-                        {prompt}
+                      <div className="flex flex-col items-end gap-1 max-w-[320px]">
+                        <div className="flex items-center gap-2">
+                          <div className="relative h-10 w-10 rounded-full overflow-hidden border border-white/10 bg-white/10">
+                            <Image src="/user.jpeg" alt="User" fill className="object-cover" />
+                          </div>
+                          <span className="text-sm font-mono text-mainColor">404khai</span>
+                        </div>
+                        <div className="max-w-[320px] rounded-tl-lg rounded-bl-lg rounded-br-lg bg-mainColor border border-white/10 px-4 py-3 text-sm font-mono text-black">
+                          {prompt}
+                        </div>
                       </div>
                     </div>
                     <div className="flex justify-start">
@@ -451,9 +459,18 @@ export default function CanvasDemo() {
                         initial={{ opacity: 0, y: 8 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.25 }}
-                        className="max-w-[280px] rounded-2xl bg-white border border-black/10 px-3 py-2 text-sm font-mono text-black"
                       >
-                        Generating diagram…
+                        <div className="flex flex-col items-start gap-1 max-w-[340px]">
+                          <div className="flex items-center gap-2">
+                            <div className="relative h-10 w-10 rounded-full overflow-hidden border border-white/10">
+                              <Image src="/logo.png" alt="Bricx" fill className="object-contain p-1.5" />
+                            </div>
+                            <span className="text-sm font-mono text-white/80">Bricx</span>
+                          </div>
+                          <div className="max-w-[340px] rounded-tr-lg rounded-bl-lg rounded-br-lg bg-[#252525] border border-black/10 px-4 py-3 text-sm font-mono text-white/90">
+                            Generating diagram…
+                          </div>
+                        </div>
                       </motion.div>
                     </div>
                   </>
