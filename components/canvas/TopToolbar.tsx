@@ -86,7 +86,7 @@ export default function TopToolbar() {
         {/* User Profile */}
         <button
           type="button"
-          onClick={() => router.push("/settings")}
+          onClick={() => router.push("/profile")}
           className="relative p-[2px] rounded-full bg-white cursor-pointer"
         >
           <div className="absolute inset-0 rounded-full" style={{ background: "conic-gradient(#FFB563 0deg 90deg, #F85E00 90deg 270deg, #FBBC05 270deg 360deg)" }} />

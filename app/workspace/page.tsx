@@ -1,7 +1,7 @@
 "use client";
 
-import WorkflowsNavbar from "@/components/workflows/WorkflowsNavbar";
-import WorkflowCard from "@/components/workflows/WorkflowCard";
+import WorkflowsNavbar from "@/components/workspace/WorkflowsNavbar";
+import WorkflowCard from "@/components/workspace/WorkflowCard";
 import { Plus } from "@phosphor-icons/react";
 import Link from "next/link";
 
