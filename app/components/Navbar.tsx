@@ -16,7 +16,7 @@ const Navbar = () => {
           <Image src="/logo.png" alt="Logo" className="h-10 w-10 md:h-15 md:w-15" width={100} height={10} />
           <p className="text-xl md:text-2xl font-dynapuff">Supabricx</p>
         </div>
-        <div className="hidden md:flex justify-evenly items-center h-full w-100 bg-black/10 backdrop-blur-md border border-white/10">
+        <div className="hidden md:flex justify-evenly items-center h-full w-100 bg-[#E6D2BC] backdrop-blur-md border border-white/10">
           <p className="font-dynapuff">Docs</p>
           <p className="font-dynapuff">Changelog</p>
           <p className="font-dynapuff">Pricing</p>
@@ -39,7 +39,7 @@ const Navbar = () => {
               className="p-[3px]"
               style={{ background: "conic-gradient(#FFB563 0deg 90deg, #F85E00 90deg 270deg, #FBBC05 270deg 360deg)" }}
             >
-              <div className="relative h-10 w-10 overflow-hidden bg-white shadow-sm">
+              <div className="relative h-9.5 w-10 overflow-hidden bg-white shadow-sm">
                 <Image src="/user.jpeg" alt="avatar" fill className="object-cover" />
               </div>
             </div>

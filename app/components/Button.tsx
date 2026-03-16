@@ -26,7 +26,7 @@ const Button: React.FC<ButtonProps> = ({
       style={{ width, height: styleHeight }}
       className={`
         relative 
-        bg-black/10 
+        bg-[#E6D2BC]
         backdrop-blur-md
         before:hidden after:hidden
         text-black 
