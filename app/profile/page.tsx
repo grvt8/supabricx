@@ -11,6 +11,7 @@ import {
   UserCircle,
 } from "@phosphor-icons/react";
 import AccountSidebar from "../components/AccountSidebar";
+import Navbar from "../components/Navbar";
 
 const activity = Array.from({ length: 7 * 52 }, (_, i) => {
   const seed = (i * 73 + 19) % 100;
@@ -68,6 +69,7 @@ export default function ProfilePage() {
 
   return (
     <div className="min-h-screen w-full bg-foreground text-black">
+      <Navbar />
       <div className="mx-auto flex w-full max-w-6xl gap-10 px-6 py-10">
         <AccountSidebar />
 
