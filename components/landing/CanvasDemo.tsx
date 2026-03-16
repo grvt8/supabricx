@@ -11,7 +11,7 @@ import {
   CaretDown,
   Chat,
   Chats,
-  MapPin,
+  MapPinArea,
   Package,
   Receipt,
   ClipboardText, 
@@ -50,7 +50,7 @@ function getEntityCardHeight(fieldCount: number) {
 
 function getEntityIcon(id: string, color: string) {
   if (id === "users") return <User size={20} color={color} />;
-  if (id === "addresses") return <MapPin size={20} color={color} />;
+  if (id === "addresses") return <MapPinArea size={20} color={color} />;
   if (id === "products") return <Package size={20} color={color} />;
   if (id === "orders") return <Receipt size={20} color={color} />;
   if (id === "order_items") return <ClipboardText size={20} color={color} />;
@@ -108,10 +108,10 @@ export default function CanvasDemo() {
       {
         id: "users",
         title: "users",
-        color: "#2FC1FF",
-        x: 120,
-        y: 120,
-        w: 250,
+        color: "#06B6D4",
+        x: 20,
+        y: 20,
+        w: 200,
         fields: [
           { name: "id", type: "uuid", key: "PK" },
           { name: "email", type: "string" },
@@ -126,10 +126,10 @@ export default function CanvasDemo() {
       {
         id: "addresses",
         title: "addresses",
-        color: "#60A5FA",
-        x: 500,
+        color: "#FF2F9F",
+        x: 300,
         y: 160,
-        w: 260,
+        w: 200,
         fields: [
           { name: "id", type: "uuid", key: "PK" },
           { name: "user_id", type: "uuid", key: "FK" },
@@ -146,9 +146,9 @@ export default function CanvasDemo() {
         id: "orders",
         title: "orders",
         color: "#F85E00",
-        x: 260,
-        y: 460,
-        w: 300,
+        x: 20,
+        y: 400,
+        w: 200,
         fields: [
           { name: "id", type: "uuid", key: "PK" },
           { name: "user_id", type: "uuid", key: "FK" },
@@ -173,7 +173,7 @@ export default function CanvasDemo() {
         color: "#F59E0B",
         x: 900,
         y: 460,
-        w: 300,
+        w: 200,
         fields: [
           { name: "id", type: "uuid", key: "PK" },
           { name: "order_id", type: "uuid", key: "FK" },
@@ -189,7 +189,7 @@ export default function CanvasDemo() {
         color: "#22C55E",
         x: 1040,
         y: 140,
-        w: 280,
+        w: 200,
         fields: [
           { name: "id", type: "uuid", key: "PK" },
           { name: "name", type: "string" },
@@ -209,10 +209,10 @@ export default function CanvasDemo() {
       {
         id: "payments",
         title: "payments",
-        color: "#FF2F9F",
+        color: "#60A5FA",
         x: 220,
         y: 860,
-        w: 310,
+        w: 220,
         fields: [
           { name: "id", type: "uuid", key: "PK" },
           { name: "order_id", type: "uuid", key: "FK" },
@@ -229,10 +229,10 @@ export default function CanvasDemo() {
       {
         id: "shipping",
         title: "shipping",
-        color: "#06B6D4",
+        color: "#2FC1FF",
         x: 740,
         y: 860,
-        w: 320,
+        w: 220,
         fields: [
           { name: "id", type: "uuid", key: "PK" },
           { name: "order_id", type: "uuid", key: "FK" },
@@ -273,11 +273,14 @@ export default function CanvasDemo() {
       const inputRect = input.getBoundingClientRect();
       const sendRect = send.getBoundingClientRect();
 
+      // Cursor: initial idle position near the middle of the preview
       const start: Point = { x: c.width * 0.55, y: c.height * 0.32 };
+      // Cursor: typing position inside the textarea (use px so it doesn't drift into the send button)
       const inputPoint: Point = {
         x: inputRect.left - c.left + inputRect.width * 0.85,
-        y: inputRect.top - c.top + inputRect.height * 0.65,
+        y: inputRect.top - c.top + inputRect.height * 0.10,
       };
+      // Cursor: click position on the PaperPlane button
       const sendPoint: Point = {
         x: sendRect.left - c.left + sendRect.width * 0.5,
         y: sendRect.top - c.top + sendRect.height * 0.5,
@@ -295,6 +298,7 @@ export default function CanvasDemo() {
     setHasRun(true);
 
     const run = async () => {
+      // Cursor: fade in at start position
       await cursorControls.start({
         x: anchors.start.x,
         y: anchors.start.y,
@@ -303,33 +307,44 @@ export default function CanvasDemo() {
         transition: { duration: 0.4, ease: "easeOut" },
       });
 
+      // Cursor: first hover sweep across the canvas area
       await cursorControls.start({
         x: anchors.start.x - 120,
         y: anchors.start.y + 90,
         transition: { duration: 0.9, ease: "easeInOut" },
       });
 
+      // Cursor: second hover sweep across the canvas area
       await cursorControls.start({
         x: anchors.start.x + 80,
         y: anchors.start.y + 40,
         transition: { duration: 0.9, ease: "easeInOut" },
       });
 
+      // Cursor: move into the textarea to start typing
       await cursorControls.start({
         x: anchors.input.x,
         y: anchors.input.y,
         transition: { duration: 0.7, ease: "easeInOut" },
       });
 
+      // Cursor: small "focus" click/pulse on the textarea
       await cursorControls.start({ scale: 0.92, transition: { duration: 0.08 } });
       await cursorControls.start({ scale: 1, transition: { duration: 0.12 } });
+      await cursorControls.start({
+        x: anchors.input.x,
+        y: anchors.input.y - 8,
+        transition: { duration: 0.25, ease: "easeInOut" },
+      });
 
+      // Textarea: type the prompt character-by-character
       setMessage("");
       for (let i = 1; i <= prompt.length; i += 1) {
         setMessage(prompt.slice(0, i));
         await new Promise((r) => setTimeout(r, 14));
       }
 
+      // Cursor: move to PaperPlane and click to submit
       await cursorControls.start({
         x: anchors.send.x,
         y: anchors.send.y,
@@ -338,11 +353,14 @@ export default function CanvasDemo() {
       await cursorControls.start({ scale: 0.92, transition: { duration: 0.08 } });
       await cursorControls.start({ scale: 1, transition: { duration: 0.12 } });
 
+      // Chat: reveal user bubble + start generation
       setSubmitted(true);
       setIsGenerating(true);
+      // Canvas: delay before ERD appears
       await new Promise((r) => setTimeout(r, 1800));
+      // Canvas: reveal ERD nodes + connections
       setShowDiagram(true);
-      await new Promise((r) => setTimeout(r, 750));
+      // Canvas: stop "Generating" overlay
       setIsGenerating(false);
     };
 
@@ -374,7 +392,7 @@ export default function CanvasDemo() {
               className={`
                 px-4 py-1.5 rounded-md text-sm font-medium transition-all
                 ${viewMode === mode.id
-                  ? "bg-mainColor text-white shadow-sm"
+                  ? "bg-mainColor text-black shadow-sm"
                   : "text-muted hover:text-black hover:bg-black/5"
                 }
               `}
@@ -440,7 +458,7 @@ export default function CanvasDemo() {
         </div>
 
         <div className="relative flex-1 bg-[#1a1a1a] overflow-hidden">
-          <div className="absolute inset-0 overflow-auto">
+          <div className="absolute inset-0 overflow-hidden">
             <div className="relative" style={{ width: WORLD_W, height: WORLD_H }}>
               <div
                 className="absolute inset-0 opacity-90"
@@ -457,6 +475,7 @@ export default function CanvasDemo() {
                 height={WORLD_H}
                 preserveAspectRatio="none"
               >
+                {/* Edges: animate drawing each connector path */}
                 {showDiagram &&
                   edges.map((e) => {
                     const from = nodes.find((n) => n.id === e.from);
@@ -474,21 +493,35 @@ export default function CanvasDemo() {
                     const y1 = from.y + fromH / 2;
                     const y2 = to.y + toH / 2;
 
-                    let x1 = fromRight;
-                    let x2 = toLeft;
-                    if (toRight <= fromLeft) {
-                      x1 = fromLeft;
-                      x2 = toRight;
-                    } else if (fromRight > toLeft && toRight > fromLeft) {
-                      x1 = from.x + from.w / 2;
-                      x2 = to.x + to.w / 2;
+                    let d = "";
+                    if ((from.id === "users" && to.id === "orders") || (from.id === "orders" && to.id === "users")) {
+                      // Route down from users then across to orders to form a clean orthogonal path
+                      const u = from.id === "users" ? from : to;
+                      const o = from.id === "orders" ? from : to;
+                      const uH = getEntityCardHeight(u.fields.length);
+                      const oH = getEntityCardHeight(o.fields.length);
+                      const ux = u.x + u.w / 2;
+                      const uy = u.y + uH;
+                      const ox = o.x + o.w / 2;
+                      const oy = o.y + oH / 2;
+                      const midY = uy + 60;
+                      d = `M ${ux} ${uy} L ${ux} ${midY} L ${ox} ${midY} L ${ox} ${oy}`;
+                    } else {
+                      let x1 = fromRight;
+                      let x2 = toLeft;
+                      if (toRight <= fromLeft) {
+                        x1 = fromLeft;
+                        x2 = toRight;
+                      } else if (fromRight > toLeft && toRight > fromLeft) {
+                        x1 = from.x + from.w / 2;
+                        x2 = to.x + to.w / 2;
+                      }
+
+                      const dx = x2 - x1;
+                      let midX = x1 + dx / 2;
+                      if (Math.abs(dx) < 120) midX = x1 + (dx >= 0 ? 160 : -160);
+                      d = `M ${x1} ${y1} L ${midX} ${y1} L ${midX} ${y2} L ${x2} ${y2}`;
                     }
-
-                    const dx = x2 - x1;
-                    let midX = x1 + dx / 2;
-                    if (Math.abs(dx) < 120) midX = x1 + (dx >= 0 ? 160 : -160);
-
-                    const d = `M ${x1} ${y1} L ${midX} ${y1} L ${midX} ${y2} L ${x2} ${y2}`;
 
                     return (
                       <motion.path
@@ -506,6 +539,7 @@ export default function CanvasDemo() {
                   })}
               </svg>
 
+              {/* Nodes: animate each entity card entrance */}
               {showDiagram &&
                 nodes.map((n, idx) => (
                   <motion.div
@@ -563,38 +597,41 @@ export default function CanvasDemo() {
                     </div>
                   </motion.div>
                 ))}
-
-              {isGenerating && (
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="rounded-2xl bg-[#252525]/70 backdrop-blur-sm border border-white/10 px-5 py-4 flex items-center gap-3 shadow-lg">
-                    <motion.div
-                      animate={{ scale: [1, 1.08, 1] }}
-                      transition={{ duration: 0.9, repeat: Infinity, ease: "easeInOut" }}
-                      className="relative h-9 w-9"
-                    >
-                      <Image src="/logo.png" alt="Generating" fill className="object-contain" />
-                    </motion.div>
-                    <div className="flex flex-col">
-                      <div className="text-sm font-dynapuff text-white flex items-center gap-2">
-                        Generating
-                        <motion.span
-                          className="inline-flex"
-                          animate={{ opacity: [0.25, 1, 0.25] }}
-                          transition={{ duration: 1, repeat: Infinity }}
-                        >
-                          <Sparkle size={16} className="text-subColor" weight="fill" />
-                        </motion.span>
-                      </div>
-                      <div className="text-xs text-white/50 font-mono">ecommerce-ERD.sbx</div>
-                    </div>
-                  </div>
-                </div>
-              )}
             </div>
           </div>
 
+          {isGenerating && (
+            <div
+              className="absolute z-20 left-0 top-0 bottom-0 flex items-center justify-center pointer-events-none"
+              style={{ right: SIDEBAR_W }}
+            >
+              <div className="rounded-2xl bg-[#252525]/70 backdrop-blur-sm border border-white/10 px-5 py-4 flex items-center gap-3 shadow-lg">
+                <motion.div
+                  animate={{ scale: [1, 1.08, 1] }}
+                  transition={{ duration: 0.9, repeat: Infinity, ease: "easeInOut" }}
+                  className="relative h-9 w-9"
+                >
+                  <Image src="/logo.png" alt="Generating" fill className="object-contain" />
+                </motion.div>
+                <div className="flex flex-col">
+                  <div className="text-sm font-dynapuff text-white flex items-center gap-2">
+                    Generating
+                    <motion.span
+                      className="inline-flex"
+                      animate={{ opacity: [0.25, 1, 0.25] }}
+                      transition={{ duration: 1, repeat: Infinity }}
+                    >
+                      <Sparkle size={16} className="text-subColor" weight="fill" />
+                    </motion.span>
+                  </div>
+                  <div className="text-xs text-white/50 font-mono">ecommerce-ERD.sbx</div>
+                </div>
+              </div>
+            </div>
+          )}
+
           <div
-            className="absolute right-0 top-0 bottom-0 bg-[#0d0e12] border-l border-white/10 flex flex-col z-30"
+            className="absolute right-0 top-0 bottom-0 bg-[#0d0e12] border-l border-white/10 flex flex-col z-10"
             style={{ width: SIDEBAR_W }}
           >
             <div className="h-14 px-4 flex items-center justify-between border-b border-white/10">
@@ -737,7 +774,7 @@ export default function CanvasDemo() {
         >
           <div className="relative">
             <div className="rounded-lg bg-transparent p-1 text-white">
-              <CursorPointer className="h-7 w-7 border border-subColor" />
+              <CursorPointer className="h-7 w-7" />
             </div>
             
           </div>
