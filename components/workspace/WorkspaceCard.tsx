@@ -3,7 +3,7 @@
 import { Clock, ArrowRight, Lightning } from "@phosphor-icons/react";
 import Link from "next/link";
 
-interface WorkflowCardProps {
+interface WorkspaceCardProps {
   title: string;
   description: string;
   nodeCount: number;
@@ -11,13 +11,13 @@ interface WorkflowCardProps {
   status?: "draft" | "active" | "archived";
 }
 
-export default function WorkflowCard({
+export default function WorkspaceCard({
   title,
   description,
   nodeCount,
   lastEdited,
   status = "draft",
-}: WorkflowCardProps) {
+}: WorkspaceCardProps) {
   return (
     <Link 
       href="/canvas"

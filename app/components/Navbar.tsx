@@ -55,7 +55,7 @@ const Navbar = () => {
               Icon={ArrowUpRight}
               width="220px"
               height="h-11"
-              onClick={() => router.push('/signup')}
+              onClick={() => router.push('/workspace')}
             />
           </div>
 

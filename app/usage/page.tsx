@@ -14,10 +14,12 @@ import {
   Check,
 } from "@phosphor-icons/react";
 import AccountSidebar from "../components/AccountSidebar";
+import Navbar from "../components/Navbar";
 
 export default function UsagePage() {
   return (
     <div className="min-h-screen w-full bg-foreground text-black">
+      <Navbar />
       <div className="mx-auto flex w-full max-w-6xl gap-10 px-6 py-10">
         <AccountSidebar />
 

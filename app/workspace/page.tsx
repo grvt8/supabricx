@@ -1,11 +1,11 @@
 "use client";
 
-import WorkflowsNavbar from "@/components/workspace/WorkflowsNavbar";
-import WorkflowCard from "@/components/workspace/WorkflowCard";
+import WorkspaceCard from "@/components/workspace/WorkspaceCard";
+import Navbar from "../components/Navbar";
 import { Plus } from "@phosphor-icons/react";
 import Link from "next/link";
 
-interface Workflow {
+interface Workspace {
   id: string;
   title: string;
   description: string;
@@ -14,8 +14,8 @@ interface Workflow {
   status: "draft" | "active" | "archived";
 }
 
-export default function WorkflowsPage() {
-  const workflows: Workflow[] = [
+export default function WorkspacesPage() {
+  const Workspaces: Workspace[] = [
     {
       id: "1",
       title: "Daily 9am API Report Email",
@@ -24,38 +24,38 @@ export default function WorkflowsPage() {
       lastEdited: "3/9/2026",
       status: "draft"
     },
-    // Add more mock workflows if needed
+    // Add more mock Workspaces if needed
   ];
 
   return (
     <div className="flex flex-col min-h-screen bg-background font-display text-foreground">
       {/* Navbar */}
-      <WorkflowsNavbar />
+      <Navbar />
 
       {/* Main Content */}
       <main className="flex-1 max-w-7xl mx-auto w-full px-8 py-12">
         {/* Header */}
         <div className="flex items-center justify-between mb-12">
           <div>
-            <h1 className="text-3xl font-bold text-foreground">Workflows</h1>
-            <p className="text-muted mt-2 font-mono text-sm">Create and manage your automation workflows</p>
+            <h1 className="text-3xl font-bold text-foreground">Workspaces</h1>
+            <p className="text-muted mt-2 font-mono text-sm">Create and manage your automation Workspaces</p>
           </div>
           <Link href="/canvas" className="group flex items-center gap-2 px-6 py-3 rounded-lg bg-orange-500 hover:bg-orange-600 text-white font-medium transition-colors shadow-lg shadow-orange-500/20">
             <Plus size={20} weight="bold" />
-            New Workflow
+            New Workspace
           </Link>
         </div>
 
-        {/* Workflow Grid */}
+        {/* Workspace Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {workflows.map((workflow) => (
-            <WorkflowCard
-              key={workflow.id}
-              title={workflow.title}
-              description={workflow.description}
-              nodeCount={workflow.nodeCount}
-              lastEdited={workflow.lastEdited}
-              status={workflow.status}
+          {Workspaces.map((Workspace) => (
+            <WorkspaceCard
+              key={Workspace.id}
+              title={Workspace.title}
+              description={Workspace.description}
+              nodeCount={Workspace.nodeCount}
+              lastEdited={Workspace.lastEdited}
+              status={Workspace.status}
             />
           ))}
           
@@ -64,7 +64,7 @@ export default function WorkflowsPage() {
              <div className="h-12 w-12 rounded-full bg-border-dark flex items-center justify-center text-muted group-hover:bg-orange-500/10 group-hover:text-orange-400 transition-colors mb-4">
                <Plus size={24} weight="bold" />
              </div>
-             <span className="text-muted font-medium group-hover:text-foreground">Create new workflow</span>
+             <span className="text-muted font-medium group-hover:text-foreground">Create new Workspace</span>
           </Link>
         </div>
       </main>
