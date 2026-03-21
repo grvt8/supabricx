@@ -25,4 +25,20 @@ describe('AppController (e2e)', () => {
       .expect(200)
       .expect('Hello World!');
   });
+
+  it('/auth/me (GET) returns 401 without token', () => {
+    return request(app.getHttpServer()).get('/auth/me').expect(401);
+  });
+
+  it('/auth/logout (POST) returns 401 without token', () => {
+    return request(app.getHttpServer()).post('/auth/logout').expect(401);
+  });
+
+  it('/users/credits (GET) returns 401 without token', () => {
+    return request(app.getHttpServer()).get('/users/credits').expect(401);
+  });
+
+  it('/diagrams (GET) returns 401 without token', () => {
+    return request(app.getHttpServer()).get('/diagrams').expect(401);
+  });
 });
