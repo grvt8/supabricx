@@ -19,6 +19,10 @@ describe('AppController (e2e)', () => {
     await app.init();
   });
 
+  afterEach(async () => {
+    await app.close();
+  });
+
   it('/ (GET)', () => {
     return request(app.getHttpServer())
       .get('/')
@@ -40,5 +44,13 @@ describe('AppController (e2e)', () => {
 
   it('/diagrams (GET) returns 401 without token', () => {
     return request(app.getHttpServer()).get('/diagrams').expect(401);
+  });
+
+  it('/ai/chat (POST) returns 401 without token', () => {
+    return request(app.getHttpServer()).post('/ai/chat').expect(401);
+  });
+
+  it('/billing/usage (GET) returns 401 without token', () => {
+    return request(app.getHttpServer()).get('/billing/usage').expect(401);
   });
 });
