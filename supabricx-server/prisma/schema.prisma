@@ -1,0 +1,218 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String   @id @default(cuid())
+  githubId      String   @unique
+  username      String   @unique
+  email         String   @unique
+  avatarUrl     String?
+  name          String?
+  bio           String?
+  role          UserRole @default(USER)
+  credits       Int      @default(50)
+  creditsUsed   Int      @default(0)
+  creditResetAt DateTime @default(now())
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  diagrams      Diagram[]
+  comments      Comment[]
+  permissions   DiagramPermission[]
+  activityLogs  ActivityLog[]
+  refreshTokens RefreshToken[]
+
+  @@index([githubId])
+  @@index([email])
+}
+
+enum UserRole {
+  USER
+  ADMIN
+  TEAM
+}
+
+model Diagram {
+  id           String  @id @default(cuid())
+  name         String
+  description  String?
+  nodes        Json
+  edges        Json
+  viewport     Json?
+  isPublic     Boolean @default(false)
+  isTemplate   Boolean @default(false)
+  thumbnailUrl String?
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  permissions DiagramPermission[]
+  comments    Comment[]
+  versions    DiagramVersion[]
+  exports     Export[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([isPublic])
+  @@index([isTemplate])
+}
+
+model DiagramVersion {
+  id      String @id @default(cuid())
+  version Int
+  nodes   Json
+  edges   Json
+  message String?
+
+  diagramId String
+  diagram   Diagram @relation(fields: [diagramId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@unique([diagramId, version])
+  @@index([diagramId])
+}
+
+model DiagramPermission {
+  id   String         @id @default(cuid())
+  role PermissionRole @default(VIEWER)
+
+  diagramId String
+  diagram   Diagram @relation(fields: [diagramId], references: [id], onDelete: Cascade)
+
+  userId String?
+  user   User? @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  email String?
+  token String? @unique
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([diagramId, userId])
+  @@unique([diagramId, email])
+  @@index([diagramId])
+  @@index([userId])
+}
+
+enum PermissionRole {
+  OWNER
+  EDITOR
+  VIEWER
+  COMMENTER
+}
+
+model Comment {
+  id       String  @id @default(cuid())
+  content  String
+  nodeId   String?
+  resolved Boolean @default(false)
+
+  diagramId String
+  diagram   Diagram @relation(fields: [diagramId], references: [id], onDelete: Cascade)
+
+  userId String
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  parentId String?
+  parent   Comment?  @relation("CommentReplies", fields: [parentId], references: [id])
+  replies  Comment[] @relation("CommentReplies")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([diagramId])
+  @@index([userId])
+  @@index([parentId])
+}
+
+model Export {
+  id            String       @id @default(cuid())
+  format        ExportFormat
+  filePath      String
+  fileSize      Int
+  downloadCount Int          @default(0)
+
+  diagramId String
+  diagram   Diagram @relation(fields: [diagramId], references: [id], onDelete: Cascade)
+
+  userId String
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([diagramId])
+  @@index([userId])
+}
+
+enum ExportFormat {
+  TERRAFORM
+  KUBERNETES
+  DOCKER_COMPOSE
+  FASTAPI
+  EXPRESS
+  PNG
+  SVG
+  MERMAID
+  PDF
+  JSON
+}
+
+model RefreshToken {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  expiresAt DateTime
+
+  userId String
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+}
+
+model ActivityLog {
+  id        String @id @default(cuid())
+  action    String
+  metadata  Json?
+  ipAddress String?
+  userAgent String?
+
+  userId String
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  diagramId String?
+  diagram   Diagram? @relation(fields: [diagramId], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([diagramId])
+  @@index([createdAt])
+}
+
+model CreditTransaction {
+  id      String @id @default(cuid())
+  amount  Int
+  balance Int
+  reason  String
+  metadata Json?
+
+  userId String
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([createdAt])
+}

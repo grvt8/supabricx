@@ -1,0 +1,374 @@
+4. USERS MODULE
+Create users module:
+nest g module users
+nest g controller users
+nest g service users
+
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { PrismaService } from '../../database/prisma.service';
+
+@Injectable()
+export class UsersService {
+  constructor(private prisma: PrismaService) {}
+
+  async findById(id: string) {
+    const user = await this.prisma.user.findUnique({
+      where: { id },
+      include: {
+        diagrams: {
+          where: { isTemplate: false },
+          orderBy: { updatedAt: 'desc' },
+          take: 10,
+        },
+      },
+    });
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    return user;
+  }
+
+  async updateProfile(userId: string, data: { name?: string; bio?: string }) {
+    return this.prisma.user.update({
+      where: { id: userId },
+      data,
+    });
+  }
+
+  async getCredits(userId: string) {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { credits: true, creditsUsed: true, creditResetAt: true },
+    });
+
+    return user;
+  }
+
+  async deductCredits(userId: string, amount: number, reason: string) {
+    return this.prisma.$transaction(async (tx) => {
+      const user = await tx.user.findUnique({
+        where: { id: userId },
+      });
+
+      if (user.credits < amount) {
+        throw new Error('Insufficient credits');
+      }
+
+      const newBalance = user.credits - amount;
+      const newUsed = user.creditsUsed + amount;
+
+      await tx.user.update({
+        where: { id: userId },
+        data: { credits: newBalance, creditsUsed: newUsed },
+      });
+
+      await tx.creditTransaction.create({
+        data: {
+          userId,
+          amount: -amount,
+          balance: newBalance,
+          reason,
+        },
+      });
+
+      return { balance: newBalance, used: newUsed };
+    });
+  }
+
+  async addCredits(userId: string, amount: number, reason: string) {
+    return this.prisma.$transaction(async (tx) => {
+      const user = await tx.user.findUnique({
+        where: { id: userId },
+      });
+
+      const newBalance = user.credits + amount;
+
+      await tx.user.update({
+        where: { id: userId },
+        data: { credits: newBalance },
+      });
+
+      await tx.creditTransaction.create({
+        data: {
+          userId,
+          amount,
+          balance: newBalance,
+          reason,
+        },
+      });
+
+      return { balance: newBalance };
+    });
+  }
+}
+
+5. DIAGRAMS MODULE
+Create diagrams module:
+nest g module diagrams
+nest g controller diagrams
+nest g service diagrams
+src/modules/diagrams/diagrams.service.ts:
+import {
+  Injectable,
+  NotFoundException,
+  ForbiddenException,
+} from '@nestjs/common';
+import { PrismaService } from '../../database/prisma.service';
+import { CreateDiagramDto, UpdateDiagramDto } from './dto';
+
+@Injectable()
+export class DiagramsService {
+  constructor(private prisma: PrismaService) {}
+
+  async create(userId: string, dto: CreateDiagramDto) {
+    const diagram = await this.prisma.diagram.create({
+      data: {
+        name: dto.name,
+        description: dto.description,
+        nodes: dto.nodes || [],
+        edges: dto.edges || [],
+        viewport: dto.viewport,
+        userId,
+      },
+    });
+
+    // Create initial version
+    await this.prisma.diagramVersion.create({
+      data: {
+        diagramId: diagram.id,
+        version: 1,
+        nodes: dto.nodes || [],
+        edges: dto.edges || [],
+        message: 'Initial version',
+      },
+    });
+
+    // Log activity
+    await this.prisma.activityLog.create({
+      data: {
+        userId,
+        diagramId: diagram.id,
+        action: 'DIAGRAM_CREATED',
+      },
+    });
+
+    return diagram;
+  }
+
+  async findAll(userId: string, filters?: { public?: boolean; template?: boolean }) {
+    return this.prisma.diagram.findMany({
+      where: {
+        OR: [
+          { userId },
+          { isPublic: filters?.public ?? false },
+          { permissions: { some: { userId } } },
+        ],
+        ...(filters?.template !== undefined && {
+          isTemplate: filters.template,
+        }),
+      },
+      include: {
+        user: {
+          select: { username: true, avatarUrl: true },
+        },
+      },
+      orderBy: { updatedAt: 'desc' },
+    });
+  }
+
+  async findOne(id: string, userId: string) {
+    const diagram = await this.prisma.diagram.findUnique({
+      where: { id },
+      include: {
+        user: {
+          select: { id: true, username: true, avatarUrl: true },
+        },
+        permissions: true,
+        versions: {
+          orderBy: { version: 'desc' },
+          take: 5,
+        },
+      },
+    });
+
+    if (!diagram) {
+      throw new NotFoundException('Diagram not found');
+    }
+
+    // Check permissions
+    const canAccess =
+      diagram.userId === userId ||
+      diagram.isPublic ||
+      diagram.permissions.some((p) => p.userId === userId);
+
+    if (!canAccess) {
+      throw new ForbiddenException('Access denied');
+    }
+
+    return diagram;
+  }
+
+  async update(id: string, userId: string, dto: UpdateDiagramDto) {
+    const diagram = await this.findOne(id, userId);
+
+    // Check if user has edit permission
+    const canEdit =
+      diagram.userId === userId ||
+      diagram.permissions.some(
+        (p) => p.userId === userId && ['OWNER', 'EDITOR'].includes(p.role),
+      );
+
+    if (!canEdit) {
+      throw new ForbiddenException('Edit permission denied');
+    }
+
+    const updated = await this.prisma.diagram.update({
+      where: { id },
+      data: {
+        name: dto.name,
+        description: dto.description,
+        nodes: dto.nodes,
+        edges: dto.edges,
+        viewport: dto.viewport,
+      },
+    });
+
+    // Create new version if nodes/edges changed
+    if (dto.nodes || dto.edges) {
+      const latestVersion = await this.prisma.diagramVersion.findFirst({
+        where: { diagramId: id },
+        orderBy: { version: 'desc' },
+      });
+
+      await this.prisma.diagramVersion.create({
+        data: {
+          diagramId: id,
+          version: (latestVersion?.version || 0) + 1,
+          nodes: dto.nodes || diagram.nodes,
+          edges: dto.edges || diagram.edges,
+          message: dto.versionMessage,
+        },
+      });
+    }
+
+    // Log activity
+    await this.prisma.activityLog.create({
+      data: {
+        userId,
+        diagramId: id,
+        action: 'DIAGRAM_UPDATED',
+      },
+    });
+
+    return updated;
+  }
+
+  async delete(id: string, userId: string) {
+    const diagram = await this.findOne(id, userId);
+
+    if (diagram.userId !== userId) {
+      throw new ForbiddenException('Only owner can delete');
+    }
+
+    await this.prisma.diagram.delete({
+      where: { id },
+    });
+
+    // Log activity
+    await this.prisma.activityLog.create({
+      data: {
+        userId,
+        diagramId: id,
+        action: 'DIAGRAM_DELETED',
+      },
+    });
+
+    return { message: 'Diagram deleted successfully' };
+  }
+
+  async createVersion(
+    id: string,
+    userId: string,
+    message?: string,
+  ) {
+    const diagram = await this.findOne(id, userId);
+
+    const latestVersion = await this.prisma.diagramVersion.findFirst({
+      where: { diagramId: id },
+      orderBy: { version: 'desc' },
+    });
+
+    const version = await this.prisma.diagramVersion.create({
+      data: {
+        diagramId: id,
+        version: (latestVersion?.version || 0) + 1,
+        nodes: diagram.nodes,
+        edges: diagram.edges,
+        message,
+      },
+    });
+
+    return version;
+  }
+
+  async restoreVersion(
+    diagramId: string,
+    versionId: string,
+    userId: string,
+  ) {
+    const version = await this.prisma.diagramVersion.findUnique({
+      where: { id: versionId },
+    });
+
+    if (!version || version.diagramId !== diagramId) {
+      throw new NotFoundException('Version not found');
+    }
+
+    return this.update(diagramId, userId, {
+      nodes: version.nodes,
+      edges: version.edges,
+      versionMessage: `Restored from version ${version.version}`,
+    });
+  }
+}
+
+7. API ROUTES SUMMARY
+Phase 1 Endpoints:
+# Auth
+GET  /auth/github                    - Initiate GitHub OAuth
+GET  /auth/github/callback           - OAuth callback
+POST /auth/refresh                   - Refresh access token
+POST /auth/logout                    - Logout user
+GET  /auth/me                        - Get current user
+
+# Users
+GET  /users/:id                      - Get user profile
+PUT  /users/profile                  - Update profile
+GET  /users/credits                  - Get credit balance
+
+# Diagrams
+POST   /diagrams                     - Create diagram
+GET    /diagrams                     - List user's diagrams
+GET    /diagrams/:id                 - Get diagram details
+PUT    /diagrams/:id                 - Update diagram
+DELETE /diagrams/:id                 - Delete diagram
+POST   /diagrams/:id/versions        - Create version
+POST   /diagrams/:id/versions/:vid/restore - Restore version
+
+PHASE 1 CHECKLIST
+Initialize NestJS project with TypeScript
+Configure Prisma + PostgreSQL
+Set up GitHub OAuth application
+Implement JWT authentication
+Create all database models
+Build auth module with GitHub strategy
+Build users module with credit system
+Build diagrams module with CRUD
+Add request logging with Pino
+Configure CORS for frontend
+Write unit tests for services
+Write e2e tests for API endpoints
+Create Dockerfile and docker-compose.yml
+
