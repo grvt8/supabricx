@@ -1,0 +1,309 @@
+
+---
+
+# 📦 PHASE 2: AI SERVICES (Weeks 4-6)
+
+## Prompt for Phase 2:
+
+Build Supabricx Backend Phase 2 - AI Services Integration.
+1. AI MODULE SETUP
+Create AI module:
+nest g module ai
+nest g controller ai
+nest g service ai
+
+Install AI dependencies
+npm install ai @ai-sdk/openai @ai-sdk/anthropic
+npm install langchain @langchain/openai @langchain/core
+npm install @nestjs/schedule
+npm install @nestjs/throttler
+
+2. AI CHAT SERVICE
+src/modules/ai/ai.service.ts:
+import { Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { streamText } from 'ai';
+import { openai } from '@ai-sdk/openai';
+import { PrismaService } from '../../database/prisma.service';
+import { UsersService } from '../users/users.service';
+
+@Injectable()
+export class AiService {
+  constructor(
+    private configService: ConfigService,
+    private prisma: PrismaService,
+    private usersService: UsersService,
+  ) {}
+
+  async chat(userId: string, message: string, diagramContext?: any) {
+    // Check credits
+    await this.usersService.deductCredits(userId, 2, 'AI_CHAT_MESSAGE');
+
+    const systemPrompt = `You are Supabricx AI, an architecture design assistant.
+    Help users design, analyze, and improve their system architecture.
+    Be concise and technical. Use markdown for code blocks.`;
+
+    const result = await streamText({
+      model: openai('gpt-4-turbo'),
+      system: systemPrompt,
+      messages: [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: message },
+      ],
+    });
+
+    // Save conversation history
+    await this.prisma.activityLog.create({
+      data: {
+        userId,
+        action: 'AI_CHAT',
+        metadata: { message, diagramId: diagramContext?.id },
+      },
+    });
+
+    return result;
+  }
+
+  async generateDiagram(userId: string, prompt: string) {
+    // Check credits
+    await this.usersService.deductCredits(userId, 10, 'AI_DIAGRAM_GENERATION');
+
+    const systemPrompt = `You are a diagram generator. Output JSON with nodes and edges.
+    Available node types: microservice, database, gateway, cache, queue, vpc, subnet, cdn, auth, logging, metrics, user, external_api
+    Available edge types: http, tcp, async, stream
+    
+    Output format:
+    {
+      "nodes": [{"id": "1", "type": "microservice", "label": "API Gateway"}],
+      "edges": [{"source": "1", "target": "2", "type": "http"}]
+    }`;
+
+    const result = await streamText({
+      model: openai('gpt-4-turbo'),
+      system: systemPrompt,
+      messages: [{ role: 'user', content: prompt }],
+    });
+
+    return result;
+  }
+
+  async analyzeArchitecture(userId: string, diagram: any) {
+    // Check credits
+    await this.usersService.deductCredits(userId, 20, 'ARCHITECTURE_ANALYSIS');
+
+    const prompt = `Analyze this architecture diagram for:
+    1. Single points of failure
+    2. Security vulnerabilities
+    3. Scalability issues
+    4. Cost optimization opportunities
+    
+    Diagram: ${JSON.stringify(diagram)}
+    
+    Output suggestions with severity (high/medium/low) and recommended fixes.`;
+
+    const result = await streamText({
+      model: openai('gpt-4-turbo'),
+      messages: [{ role: 'user', content: prompt }],
+    });
+
+    return result;
+  }
+}
+
+3. GITHUB SCANNER SERVICE
+src/modules/ai/github-scanner.service.ts:
+import { Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { PrismaService } from '../../database/prisma.service';
+
+@Injectable()
+export class GithubScannerService {
+  constructor(
+    private configService: ConfigService,
+    private prisma: PrismaService,
+  ) {}
+
+  async scanRepository(userId: string, repoUrl: string) {
+    // Deduct credits
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: { credits: { decrement: 25 } },
+    });
+
+    // Parse repo URL
+    const [owner, repo] = repoUrl.replace('https://github.com/', '').split('/');
+
+    // Fetch file tree from GitHub API
+    const response = await fetch(
+      `https://api.github.com/repos/${owner}/${repo}/git/trees/main?recursive=1`,
+      {
+        headers: {
+          Authorization: `token ${this.configService.get('GITHUB_TOKEN')}`,
+        },
+      },
+    );
+
+    const data = await response.json();
+
+    // Analyze files
+    const analysis = this.analyzeFiles(data.tree);
+
+    // Generate diagram from analysis
+    const diagram = this.generateDiagramFromAnalysis(analysis);
+
+    return { analysis, diagram };
+  }
+
+  private analyzeFiles(files: any[]) {
+    const services = [];
+    const databases = [];
+    const dependencies = [];
+
+    for (const file of files) {
+      if (file.path.includes('docker-compose.yml')) {
+        // Parse docker-compose for services
+      }
+      if (file.path.includes('package.json') || file.path.includes('requirements.txt')) {
+        // Parse dependencies
+      }
+      if (file.path.includes('.tf') || file.path.includes('terraform/')) {
+        // Parse Terraform for infrastructure
+      }
+    }
+
+    return { services, databases, dependencies };
+  }
+
+  private generateDiagramFromAnalysis(analysis: any) {
+    // Convert analysis to diagram nodes/edges
+    return { nodes: [], edges: [] };
+  }
+}
+
+4. AI CONTROLLER
+src/modules/ai/ai.controller.ts:
+import {
+  Controller,
+  Post,
+  Body,
+  UseGuards,
+  Request,
+  Sse,
+} from '@nestjs/common';
+import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
+import { AiService } from './ai.service';
+import { GithubScannerService } from './github-scanner.service';
+import { Observable } from 'rxjs';
+
+@Controller('ai')
+@UseGuards(JwtAuthGuard)
+export class AiController {
+  constructor(
+    private aiService: AiService,
+    private githubScanner: GithubScannerService,
+  ) {}
+
+  @Post('chat')
+  @Sse()
+  async chat(@Request() req, @Body('message') message: string): Observable<any> {
+    return this.aiService.chat(req.user.id, message);
+  }
+
+  @Post('generate')
+  @Sse()
+  async generateDiagram(
+    @Request() req,
+    @Body('prompt') prompt: string,
+  ): Observable<any> {
+    return this.aiService.generateDiagram(req.user.id, prompt);
+  }
+
+  @Post('analyze')
+  @Sse()
+  async analyzeArchitecture(
+    @Request() req,
+    @Body('diagram') diagram: any,
+  ): Observable<any> {
+    return this.aiService.analyzeArchitecture(req.user.id, diagram);
+  }
+
+  @Post('github/scan')
+  async scanGithub(
+    @Request() req,
+    @Body('repoUrl') repoUrl: string,
+  ) {
+    return this.githubScanner.scanRepository(req.user.id, repoUrl);
+  }
+}
+
+5. CREDIT SYSTEM ENHANCEMENT
+src/modules/billing/billing.service.ts:
+import { Injectable } from '@nestjs/common';
+import { PrismaService } from '../../database/prisma.service';
+import { Cron, CronExpression } from '@nestjs/schedule';
+
+@Injectable()
+export class BillingService {
+  constructor(private prisma: PrismaService) {}
+
+  @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
+  async resetCredits() {
+    const users = await this.prisma.user.findMany({
+      where: {
+        creditResetAt: {
+          lte: new Date(),
+        },
+      },
+    });
+
+    for (const user of users) {
+      await this.prisma.user.update({
+        where: { id: user.id },
+        data: {
+          credits: 50, // Reset to free tier
+          creditsUsed: 0,
+          creditResetAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+        },
+      });
+
+      await this.prisma.creditTransaction.create({
+        data: {
+          userId: user.id,
+          amount: 50,
+          balance: 50,
+          reason: 'Monthly credit reset',
+        },
+      });
+    }
+  }
+
+  async getUsageHistory(userId: string, days = 30) {
+    const startDate = new Date();
+    startDate.setDate(startDate.getDate() - days);
+
+    return this.prisma.creditTransaction.findMany({
+      where: {
+        userId,
+        createdAt: { gte: startDate },
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+}
+
+PHASE 2 CHECKLIST
+Create AI module with NestJS
+Integrate Vercel AI SDK
+Implement chat service with streaming
+Build text-to-diagram generation
+Create GitHub scanner service
+Implement architecture analysis
+Add credit deduction for AI operations
+Build billing/credit management service
+Add scheduled credit reset (cron)
+Create usage history endpoint
+Implement rate limiting for AI endpoints
+Add error handling for AI failures
+Write tests for AI services
+Deploy with AI environment variables
+Build Phase 2 with focus on streaming responses and credit tracking.

@@ -150,6 +150,10 @@ export class AuthService {
     return this.issueTokens(user);
   }
 
+  logout(userId: string) {
+    return this.prisma.refreshToken.deleteMany({ where: { userId } });
+  }
+
   private durationToMs(value: string) {
     const trimmed = value.trim();
     const match = trimmed.match(/^(\d+)([smhd])$/);

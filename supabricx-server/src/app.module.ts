@@ -11,6 +11,7 @@ import { jwtConfig } from './config/jwt.config';
 import { s3Config } from './config/s3.config';
 import { DatabaseModule } from './database/database.module';
 import { AuthModule } from './modules/auth/auth.module';
+import { DiagramsModule } from './modules/diagrams/diagrams.module';
 import { UsersModule } from './modules/users/users.module';
 
 @Module({
@@ -43,6 +44,7 @@ import { UsersModule } from './modules/users/users.module';
     DatabaseModule,
     UsersModule,
     AuthModule,
+    DiagramsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
