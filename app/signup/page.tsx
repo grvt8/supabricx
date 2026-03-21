@@ -8,7 +8,7 @@ export default function SignupPage() {
   return (
     <div className="flex min-h-screen w-full bg-[#050608] font-display text-white">
       {/* Left Panel - Form */}
-      <div className="flex w-full flex-col justify-between p-8 md:w-1/2 lg:p-12 xl:p-16 relative z-10">
+      <div className="flex w-full flex-col justify-between p-8 md:w-1/2 lg:p-12 relative z-10">
         <Link 
           href="/" 
           className="group flex items-center gap-2 text-sm text-zinc-400 hover:text-white transition-colors w-fit"
@@ -28,7 +28,7 @@ export default function SignupPage() {
           <div className="grid gap-4">
             <div className="grid grid-cols-2 gap-4">
               <button className="flex items-center justify-center gap-2 rounded-lg border border-white/10 bg-white/5 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-white/10 hover:border-white/20">
-                <Image src="/github.png" alt="GitHub" width={20} height={20} className="invert" />
+                <Image src="/github.png" alt="GitHub" width={20} height={20} className="w-6 h-6 invert" />
                 GitHub
               </button>
               <button className="flex items-center justify-center gap-2 rounded-lg border border-white/10 bg-white/5 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-white/10 hover:border-white/20">
@@ -98,14 +98,14 @@ export default function SignupPage() {
       {/* Right Panel - Image */}
       <div className="hidden w-1/2 bg-zinc-900 md:block relative">
         <Image
-          src="/signup.jpeg"
+          src="/signup.png"
           alt="Signup visualization"
           fill
           className="object-cover opacity-90"
           priority
         />
         {/* Overlay gradient for text readability if needed, or just aesthetic */}
-        <div className="absolute inset-0 bg-gradient-to-t from-[#050608] via-transparent to-transparent opacity-50" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#050608] via-transparent to-transparent" />
         
         {/* Quote or testimonial overlay matching the vibe */}
         <div className="absolute bottom-12 left-12 right-12 z-20">
@@ -113,7 +113,7 @@ export default function SignupPage() {
             <p className="text-lg font-medium leading-relaxed">
               &ldquo;Supabricx has completely transformed how we build and deploy our microservices. It&apos;s like having a senior architect on call 24/7.&rdquo;
             </p>
-            <footer className="text-sm text-zinc-400">Sofia Davis, CTO at TechFlow</footer>
+            <footer className="text-sm text-zinc-400">Sofia Davis, CTO at Aevolyn</footer>
           </blockquote>
         </div>
       </div>

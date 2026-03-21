@@ -1,0 +1,352 @@
+Build Supabricx Backend MVP using NestJS with GitHub OAuth authentication. Implement in 4 phases as specified below.
+
+## 🎯 TECH STACK
+
+- **Framework:** NestJS v10 + TypeScript
+- **Database:** PostgreSQL 15 + Prisma ORM
+- **Auth:** GitHub OAuth + JWT (Passport.js)
+- **Cache:** Redis (sessions, rate limiting)
+- **Storage:** AWS S3 (exports, uploads)
+- **AI:** Vercel AI SDK + OpenAI/Anthropic
+- **Real-time:** WebSocket Gateway (Socket.io)
+- **Queue:** Bull + Redis (background jobs)
+- **Logging:** Pino + Logtail/Datadog
+- **Testing:** Jest + Supertest
+- **Deployment:** Docker + Kubernetes / Railway
+
+## 📁 PROJECT STRUCTURE
+
+supabricx-server/
+├── src/
+│ ├── main.ts
+│ ├── app.module.ts
+│ ├── common/
+│ │ ├── decorators/
+│ │ ├── filters/
+│ │ ├── guards/
+│ │ ├── interceptors/
+│ │ └── pipes/
+│ ├── config/
+│ │ ├── database.config.ts
+│ │ ├── github.config.ts
+│ │ ├── jwt.config.ts
+│ │ └── s3.config.ts
+│ ├── modules/
+│ │ ├── auth/
+│ │ ├── users/
+│ │ ├── diagrams/
+│ │ ├── ai/
+│ │ ├── export/
+│ │ ├── collaboration/
+│ │ └── billing/
+│ ├── database/
+│ │ ├── prisma.service.ts
+│ │ └── migrations/
+│ └── shared/
+│ ├── types/
+│ └── utils/
+├── test/
+├── prisma/
+│ ├── schema.prisma
+│ └── seed.ts
+├── docker-compose.yml
+├── Dockerfile
+├── .env.example
+└── README.md
+
+
+
+---
+
+# 📦 PHASE 1: CORE INFRASTRUCTURE (Weeks 1-3)
+
+## Prompt for Phase 1:
+Build Supabricx Backend Phase 1 - Core Infrastructure with NestJS and GitHub OAuth.
+1. NESTJS PROJECT SETUP
+Initialize Project:
+npm i -g @nestjs/cli
+nest new supabricx-server --package-manager npm
+cd supabricx-server
+
+Install Core dependencies
+# Database
+npm install @prisma/client
+npm install -D prisma
+
+# Auth
+npm install @nestjs/passport passport @nestjs/jwt passport-jwt
+npm install passport-github2 @types/passport-github2
+
+# Validation
+npm install class-validator class-transformer
+
+# Config
+npm install @nestjs/config
+
+# Logging
+npm install nestjs-pino pino-http
+
+# S3 Storage
+npm install @aws-sdk/client-s3 @aws-sdk/s3-request-presigner
+
+# Redis
+npm install @nestjs/cache-manager cache-manager cache-manager-redis-yet
+
+Configure environment (.env.example)
+# Server
+PORT=3000
+NODE_ENV=development
+
+# Database
+DATABASE_URL="postgresql://user:password@localhost:5432/supabricx?schema=public"
+
+# GitHub OAuth
+GITHUB_CLIENT_ID="your_client_id"
+GITHUB_CLIENT_SECRET="your_client_secret"
+GITHUB_CALLBACK_URL="http://localhost:3000/auth/github/callback"
+
+# JWT
+JWT_SECRET="your_super_secret_key_min_32_chars"
+JWT_EXPIRATION="7d"
+REFRESH_TOKEN_SECRET="your_refresh_secret_key"
+REFRESH_TOKEN_EXPIRATION="30d"
+
+# Redis
+REDIS_HOST="localhost"
+REDIS_PORT=6379
+
+# S3
+AWS_REGION="us-east-1"
+AWS_ACCESS_KEY_ID="your_key"
+AWS_SECRET_ACCESS_KEY="your_secret"
+AWS_S3_BUCKET="supabricx-exports"
+
+# Frontend URL (for CORS)
+FRONTEND_URL="http://localhost:3001"
+
+
+2. PRISMA DATABASE SCHEMA
+Create prisma/schema.prisma:
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String    @id @default(cuid())
+  githubId      String    @unique
+  username      String    @unique
+  email         String    @unique
+  avatarUrl     String?
+  name          String?
+  bio           String?
+  role          UserRole  @default(USER)
+  credits       Int       @default(50)
+  creditsUsed   Int       @default(0)
+  creditResetAt DateTime  @default(now())
+  isActive      Boolean   @default(true)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  
+  diagrams      Diagram[]
+  comments      Comment[]
+  permissions   DiagramPermission[]
+  activityLogs  ActivityLog[]
+  refreshTokens RefreshToken[]
+  
+  @@index([githubId])
+  @@index([email])
+}
+
+enum UserRole {
+  USER
+  ADMIN
+  TEAM
+}
+
+model Diagram {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  nodes       Json
+  edges       Json
+  viewport    Json?
+  isPublic    Boolean  @default(false)
+  isTemplate  Boolean  @default(false)
+  thumbnailUrl String?
+  
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  permissions DiagramPermission[]
+  comments    Comment[]
+  versions    DiagramVersion[]
+  exports     Export[]
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@index([userId])
+  @@index([isPublic])
+  @@index([isTemplate])
+}
+
+model DiagramVersion {
+  id        String   @id @default(cuid())
+  version   Int
+  nodes     Json
+  edges     Json
+  message   String?
+  
+  diagramId String
+  diagram   Diagram  @relation(fields: [diagramId], references: [id], onDelete: Cascade)
+  
+  createdAt DateTime @default(now())
+  
+  @@unique([diagramId, version])
+  @@index([diagramId])
+}
+
+model DiagramPermission {
+  id        String   @id @default(cuid())
+  role      PermissionRole @default(VIEWER)
+  
+  diagramId String
+  diagram   Diagram  @relation(fields: [diagramId], references: [id], onDelete: Cascade)
+  
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  email     String?  // For invites before signup
+  token     String?  @unique // Invite token
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@unique([diagramId, userId])
+  @@unique([diagramId, email])
+  @@index([diagramId])
+  @@index([userId])
+}
+
+enum PermissionRole {
+  OWNER
+  EDITOR
+  VIEWER
+  COMMENTER
+}
+
+model Comment {
+  id        String   @id @default(cuid())
+  content   String
+  nodeId    String?  // null = canvas-level comment
+  resolved  Boolean  @default(false)
+  
+  diagramId String
+  diagram   Diagram  @relation(fields: [diagramId], references: [id], onDelete: Cascade)
+  
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  parentId  String?
+  parent    Comment? @relation("CommentReplies", fields: [parentId], references: [id])
+  replies   Comment[] @relation("CommentReplies")
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@index([diagramId])
+  @@index([userId])
+  @@index([parentId])
+}
+
+model Export {
+  id        String   @id @default(cuid())
+  format    ExportFormat
+  filePath  String
+  fileSize  Int
+  downloadCount Int @default(0)
+  
+  diagramId String
+  diagram   Diagram  @relation(fields: [diagramId], references: [id], onDelete: Cascade)
+  
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  
+  @@index([diagramId])
+  @@index([userId])
+}
+
+enum ExportFormat {
+  TERRAFORM
+  KUBERNETES
+  DOCKER_COMPOSE
+  FASTAPI
+  EXPRESS
+  PNG
+  SVG
+  MERMAID
+  PDF
+  JSON
+}
+
+model RefreshToken {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  expiresAt DateTime
+  
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  createdAt DateTime @default(now())
+  
+  @@index([userId])
+}
+
+model ActivityLog {
+  id        String   @id @default(cuid())
+  action    String
+  metadata  Json?
+  ipAddress String?
+  userAgent String?
+  
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  diagramId String?
+  diagram   Diagram? @relation(fields: [diagramId], references: [id], onDelete: SetNull)
+  
+  createdAt DateTime @default(now())
+  
+  @@index([userId])
+  @@index([diagramId])
+  @@index([createdAt])
+}
+
+model CreditTransaction {
+  id        String   @id @default(cuid())
+  amount    Int      // positive = add, negative = deduct
+  balance   Int      // balance after transaction
+  reason    String
+  metadata  Json?
+  
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  createdAt DateTime @default(now())
+  
+  @@index([userId])
+  @@index([createdAt])
+}
+
+Run Prisma
+npx prisma migrate dev --name init
+npx prisma generate
+
