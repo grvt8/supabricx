@@ -39,11 +39,13 @@
     "cache-manager-redis-yet": "^5.1.5",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.15.1",
+    "jszip": "^3.10.1",
     "nestjs-pino": "^4.6.1",
     "passport": "^0.7.0",
     "passport-github2": "^0.1.12",
     "passport-jwt": "^4.0.1",
     "pino-http": "^11.0.0",
+    "puppeteer": "^24.42.0",
     "reflect-metadata": "^0.2.0",
     "rxjs": "^7.8.1"
   },
