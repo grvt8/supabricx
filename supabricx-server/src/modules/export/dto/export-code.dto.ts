@@ -1,16 +1,13 @@
-import { ExportFormat } from '@prisma/client';
-import { IsEnum, IsString } from 'class-validator';
+import { IsIn, IsString } from 'class-validator';
+import {
+  CODE_EXPORT_FORMATS,
+  CodeExportFormat,
+} from '../export-formats';
 
 export class ExportCodeDto {
   @IsString()
   diagramId: string;
 
-  @IsEnum([
-    ExportFormat.TERRAFORM,
-    ExportFormat.KUBERNETES,
-    ExportFormat.DOCKER_COMPOSE,
-    ExportFormat.FASTAPI,
-    ExportFormat.EXPRESS,
-  ])
-  format: ExportFormat;
+  @IsIn(CODE_EXPORT_FORMATS)
+  format: CodeExportFormat;
 }

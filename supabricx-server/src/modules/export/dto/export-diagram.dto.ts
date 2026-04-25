@@ -1,18 +1,15 @@
-import { ExportFormat } from '@prisma/client';
-import { IsEnum, IsOptional, IsString, IsUrl } from 'class-validator';
+import { IsIn, IsOptional, IsString, IsUrl } from 'class-validator';
+import {
+  DIAGRAM_EXPORT_FORMATS,
+  DiagramExportFormat,
+} from '../export-formats';
 
 export class ExportDiagramDto {
   @IsString()
   diagramId: string;
 
-  @IsEnum([
-    ExportFormat.PNG,
-    ExportFormat.SVG,
-    ExportFormat.MERMAID,
-    ExportFormat.PDF,
-    ExportFormat.JSON,
-  ])
-  format: ExportFormat;
+  @IsIn(DIAGRAM_EXPORT_FORMATS)
+  format: DiagramExportFormat;
 
   @IsOptional()
   @IsUrl()

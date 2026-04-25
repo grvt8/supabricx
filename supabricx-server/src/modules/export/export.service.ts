@@ -3,13 +3,17 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { ExportFormat, Prisma } from '@prisma/client';
+import { Prisma } from '@prisma/client';
 import JSZip from 'jszip';
 import { PrismaService } from '../../database/prisma.service';
 import { DiagramsService } from '../diagrams/diagrams.service';
 import { R2Service } from '../storage/r2.service';
 import { UsersService } from '../users/users.service';
 import { DiagramExportService } from './diagram-export.service';
+import {
+  CodeExportFormat,
+  DiagramExportFormat,
+} from './export-formats';
 
 type GeneratedFile = {
   path: string;
@@ -26,7 +30,7 @@ export class ExportService {
     private readonly diagramExportService: DiagramExportService,
   ) {}
 
-  async exportCode(userId: string, diagramId: string, format: ExportFormat) {
+  async exportCode(userId: string, diagramId: string, format: CodeExportFormat) {
     const diagram = await this.diagramsService.findOne(diagramId, userId);
     await this.usersService.deductCredits(userId, 10, 'CODE_EXPORT');
 
@@ -80,7 +84,7 @@ export class ExportService {
   async exportDiagram(
     userId: string,
     diagramId: string,
-    format: ExportFormat,
+    format: DiagramExportFormat,
     diagramUrl?: string,
   ) {
     const diagram = await this.diagramsService.findOne(diagramId, userId);
@@ -92,7 +96,7 @@ export class ExportService {
     let extension: string;
 
     switch (format) {
-      case ExportFormat.PNG:
+      case 'PNG':
         if (!diagramUrl) {
           throw new BadRequestException('diagramUrl is required for PNG export');
         }
@@ -100,7 +104,7 @@ export class ExportService {
         contentType = 'image/png';
         extension = 'png';
         break;
-      case ExportFormat.PDF:
+      case 'PDF':
         if (!diagramUrl) {
           throw new BadRequestException('diagramUrl is required for PDF export');
         }
@@ -108,21 +112,21 @@ export class ExportService {
         contentType = 'application/pdf';
         extension = 'pdf';
         break;
-      case ExportFormat.SVG: {
+      case 'SVG': {
         const svg = this.diagramExportService.exportToSvg(nodes, edges, diagram.name);
         buffer = Buffer.from(svg, 'utf8');
         contentType = 'image/svg+xml';
         extension = 'svg';
         break;
       }
-      case ExportFormat.MERMAID: {
+      case 'MERMAID': {
         const mermaid = this.diagramExportService.exportToMermaid(nodes, edges);
         buffer = Buffer.from(mermaid, 'utf8');
         contentType = 'text/plain';
         extension = 'mmd';
         break;
       }
-      case ExportFormat.JSON: {
+      case 'JSON': {
         const json = this.diagramExportService.exportToJson(nodes, edges);
         buffer = Buffer.from(json, 'utf8');
         contentType = 'application/json';
@@ -210,18 +214,18 @@ export class ExportService {
     diagramName: string,
     nodes: Record<string, unknown>[],
     edges: Record<string, unknown>[],
-    format: ExportFormat,
+    format: CodeExportFormat,
   ): GeneratedFile[] {
     switch (format) {
-      case ExportFormat.TERRAFORM:
+      case 'TERRAFORM':
         return this.generateTerraform(diagramName, nodes, edges);
-      case ExportFormat.KUBERNETES:
+      case 'KUBERNETES':
         return this.generateKubernetes(diagramName, nodes, edges);
-      case ExportFormat.DOCKER_COMPOSE:
+      case 'DOCKER_COMPOSE':
         return this.generateDockerCompose(diagramName, nodes, edges);
-      case ExportFormat.FASTAPI:
+      case 'FASTAPI':
         return this.generateFastApi(diagramName, nodes, edges);
-      case ExportFormat.EXPRESS:
+      case 'EXPRESS':
         return this.generateExpress(diagramName, nodes, edges);
       default:
         throw new BadRequestException('Unsupported code export format');
