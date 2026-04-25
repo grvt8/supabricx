@@ -6,6 +6,18 @@ import {
 import { PrismaService } from '../../database/prisma.service';
 import { CreateDiagramDto, UpdateDiagramDto } from './dto';
 
+type DiagramPermissionRole = 'OWNER' | 'EDITOR' | 'VIEWER' | 'COMMENTER';
+
+type DiagramWithAccess = {
+  id: string;
+  userId: string;
+  isPublic: boolean;
+  nodes: unknown;
+  edges: unknown;
+  permissions: Array<{ userId: string | null; role: DiagramPermissionRole }>;
+  versions: Array<{ version: number }>;
+};
+
 @Injectable()
 export class DiagramsService {
   constructor(private readonly prisma: PrismaService) {}
@@ -68,43 +80,13 @@ export class DiagramsService {
   }
 
   async findOne(id: string, userId: string) {
-    const diagram = await this.prisma.diagram.findUnique({
-      where: { id },
-      include: {
-        user: { select: { id: true, username: true, avatarUrl: true } },
-        permissions: true,
-        versions: { orderBy: { version: 'desc' }, take: 5 },
-      },
-    });
-
-    if (!diagram) {
-      throw new NotFoundException('Diagram not found');
-    }
-
-    const canAccess =
-      diagram.userId === userId ||
-      diagram.isPublic ||
-      diagram.permissions.some((p: any) => p.userId === userId);
-
-    if (!canAccess) {
-      throw new ForbiddenException('Access denied');
-    }
-
+    const diagram = await this.loadDiagram(id);
+    this.ensureCanView(diagram, userId);
     return diagram;
   }
 
   async update(id: string, userId: string, dto: UpdateDiagramDto) {
-    const diagram = await this.findOne(id, userId);
-
-    const canEdit =
-      diagram.userId === userId ||
-      diagram.permissions.some(
-        (p: any) => p.userId === userId && ['OWNER', 'EDITOR'].includes(p.role),
-      );
-
-    if (!canEdit) {
-      throw new ForbiddenException('Edit permission denied');
-    }
+    const diagram = await this.assertCanEdit(id, userId);
 
     const updated = await this.prisma.diagram.update({
       where: { id },
@@ -198,5 +180,63 @@ export class DiagramsService {
       edges: version.edges,
       versionMessage: `Restored from version ${version.version}`,
     });
+  }
+
+  async assertCanComment(id: string, userId: string) {
+    const diagram = await this.loadDiagram(id);
+    this.ensureCanComment(diagram, userId);
+    return diagram;
+  }
+
+  async assertCanEdit(id: string, userId: string) {
+    const diagram = await this.loadDiagram(id);
+    this.ensureCanEdit(diagram, userId);
+    return diagram;
+  }
+
+  private async loadDiagram(id: string) {
+    const diagram = await this.prisma.diagram.findUnique({
+      where: { id },
+      include: {
+        user: { select: { id: true, username: true, avatarUrl: true } },
+        permissions: true,
+        versions: { orderBy: { version: 'desc' }, take: 5 },
+      },
+    });
+
+    if (!diagram) {
+      throw new NotFoundException('Diagram not found');
+    }
+
+    return diagram;
+  }
+
+  private ensureCanView(diagram: DiagramWithAccess, userId: string) {
+    const canAccess =
+      diagram.userId === userId ||
+      diagram.isPublic ||
+      diagram.permissions.some((permission) => permission.userId === userId);
+
+    if (!canAccess) {
+      throw new ForbiddenException('Access denied');
+    }
+  }
+
+  private ensureCanComment(diagram: DiagramWithAccess, userId: string) {
+    this.ensureCanView(diagram, userId);
+  }
+
+  private ensureCanEdit(diagram: DiagramWithAccess, userId: string) {
+    const canEdit =
+      diagram.userId === userId ||
+      diagram.permissions.some(
+        (permission) =>
+          permission.userId === userId &&
+          ['OWNER', 'EDITOR'].includes(permission.role),
+      );
+
+    if (!canEdit) {
+      throw new ForbiddenException('Edit permission denied');
+    }
   }
 }
