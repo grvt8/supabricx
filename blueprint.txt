@@ -1,0 +1,932 @@
+☁️ Cloudflare R2 Storage Service for Supabricx
+Complete implementation guide!
+Install dependencies
+npm install @aws-sdk/client-s3 @aws-sdk/s3-request-presigner
+
+Create the services 
+// src/modules/storage/r2.service.ts
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import {
+  S3Client,
+  PutObjectCommand,
+  GetObjectCommand,
+  DeleteObjectCommand,
+  ListObjectsV2Command,
+  HeadObjectCommand,
+  NotFound,
+} from '@aws-sdk/client-s3';
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
+
+@Injectable()
+export class R2Service {
+  private readonly s3Client: S3Client;
+  private readonly bucket: string;
+  private readonly publicUrl: string;
+  private readonly logger = new Logger(R2Service.name);
+
+  constructor(private configService: ConfigService) {
+    this.bucket = this.configService.get<string>('R2_BUCKET_NAME');
+    this.publicUrl = this.configService.get<string>('R2_PUBLIC_URL');
+    
+    // Initialize S3 client with R2 endpoint
+    this.s3Client = new S3Client({
+      region: 'auto', // R2 uses 'auto' for region
+      endpoint: this.configService.get<string>('R2_ENDPOINT'),
+      credentials: {
+        accessKeyId: this.configService.get<string>('R2_ACCESS_KEY_ID'),
+        secretAccessKey: this.configService.get<string>('R2_SECRET_ACCESS_KEY'),
+      },
+      // Important for R2
+      forcePathStyle: true,
+    });
+
+    this.logger.log('R2 Storage Service initialized');
+  }
+
+  /**
+   * Upload a file to R2
+   */
+  async uploadFile(
+    key: string,
+    body: Buffer | string,
+    contentType: string,
+    metadata?: Record<string, string>,
+  ): Promise<string> {
+    try {
+      const command = new PutObjectCommand({
+        Bucket: this.bucket,
+        Key: key,
+        Body: body,
+        ContentType: contentType,
+        Metadata: metadata,
+      });
+
+      await this.s3Client.send(command);
+      
+      const url = this.getFileUrl(key);
+      this.logger.log(`File uploaded: ${key} → ${url}`);
+      
+      return url;
+    } catch (error) {
+      this.logger.error(`Failed to upload file: ${key}`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * Upload diagram image (PNG/SVG)
+   */
+  async uploadDiagram(
+    diagramId: string,
+    file: Buffer,
+    format: 'png' | 'svg' | 'jpg' = 'png',
+  ): Promise<string> {
+    const key = `diagrams/${diagramId}/${Date.now()}.${format}`;
+    const contentType = `image/${format === 'jpg' ? 'jpeg' : format}`;
+    
+    return this.uploadFile(key, file, contentType, {
+      diagramId,
+      type: 'diagram',
+    });
+  }
+
+  /**
+   * Upload thumbnail
+   */
+  async uploadThumbnail(
+    diagramId: string,
+    file: Buffer,
+  ): Promise<string> {
+    const key = `thumbnails/${diagramId}/${Date.now()}.png`;
+    return this.uploadFile(key, file, 'image/png', {
+      diagramId,
+      type: 'thumbnail',
+    });
+  }
+
+  /**
+   * Upload code export (ZIP)
+   */
+  async uploadCodeExport(
+    userId: string,
+    diagramId: string,
+    file: Buffer,
+    format: string,
+  ): Promise<string> {
+    const key = `exports/${userId}/${diagramId}/${Date.now()}.zip`;
+    return this.uploadFile(key, file, 'application/zip', {
+      userId,
+      diagramId,
+      format,
+      type: 'export',
+    });
+  }
+
+  /**
+   * Upload PDF export
+   */
+  async uploadPdfExport(
+    userId: string,
+    diagramId: string,
+    file: Buffer,
+  ): Promise<string> {
+    const key = `exports/${userId}/${diagramId}/${Date.now()}.pdf`;
+    return this.uploadFile(key, file, 'application/pdf', {
+      userId,
+      diagramId,
+      type: 'pdf-export',
+    });
+  }
+
+  /**
+   * Upload user file (SRS PDF, etc.)
+   */
+  async uploadUserFile(
+    userId: string,
+    file: Buffer,
+    filename: string,
+    contentType: string,
+  ): Promise<string> {
+    const key = `uploads/${userId}/${Date.now()}-${filename}`;
+    return this.uploadFile(key, file, contentType, {
+      userId,
+      type: 'user-upload',
+    });
+  }
+
+  /**
+   * Get file URL (public or signed)
+   */
+  getFileUrl(key: string): string {
+    if (this.publicUrl) {
+      return `${this.publicUrl}/${this.bucket}/${key}`;
+    }
+    // Fallback to private URL
+    return `https://${this.bucket}.r2.cloudflarestorage.com/${key}`;
+  }
+
+  /**
+   * Get signed URL for private files (expires in 1 hour by default)
+   */
+  async getSignedUrl(
+    key: string,
+    expiresInSeconds: number = 3600,
+  ): Promise<string> {
+    try {
+      const command = new GetObjectCommand({
+        Bucket: this.bucket,
+        Key: key,
+      });
+
+      const url = await getSignedUrl(this.s3Client, command, {
+        expiresIn: expiresInSeconds,
+      });
+
+      return url;
+    } catch (error) {
+      this.logger.error(`Failed to generate signed URL for: ${key}`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * Download file as buffer
+   */
+  async downloadFile(key: string): Promise<Buffer> {
+    try {
+      const command = new GetObjectCommand({
+        Bucket: this.bucket,
+        Key: key,
+      });
+
+      const response = await this.s3Client.send(command);
+      const body = response.Body;
+
+      if (!body) {
+        throw new NotFoundException('File not found');
+      }
+
+      // Convert stream to buffer
+      const chunks: Uint8Array[] = [];
+      for await (const chunk of body as any) {
+        chunks.push(chunk);
+      }
+
+      return Buffer.concat(chunks);
+    } catch (error) {
+      if (error instanceof NotFound) {
+        throw new NotFoundException('File not found');
+      }
+      this.logger.error(`Failed to download file: ${key}`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * Delete file
+   */
+  async deleteFile(key: string): Promise<void> {
+    try {
+      const command = new DeleteObjectCommand({
+        Bucket: this.bucket,
+        Key: key,
+      });
+
+      await this.s3Client.send(command);
+      this.logger.log(`File deleted: ${key}`);
+    } catch (error) {
+      this.logger.error(`Failed to delete file: ${key}`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * Delete multiple files
+   */
+  async deleteFiles(keys: string[]): Promise<void> {
+    // Note: R2 doesn't support batch delete yet, delete one by one
+    await Promise.all(keys.map((key) => this.deleteFile(key)));
+  }
+
+  /**
+   * List files in a prefix (folder)
+   */
+  async listFiles(prefix: string, maxKeys: number = 100): Promise<string[]> {
+    try {
+      const command = new ListObjectsV2Command({
+        Bucket: this.bucket,
+        Prefix: prefix,
+        MaxKeys: maxKeys,
+      });
+
+      const response = await this.s3Client.send(command);
+      return response.Contents?.map((obj) => obj.Key) || [];
+    } catch (error) {
+      this.logger.error(`Failed to list files with prefix: ${prefix}`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get file metadata
+   */
+  async getFileMetadata(key: string): Promise<{
+    size: number;
+    contentType: string;
+    lastModified: Date;
+    metadata: Record<string, string>;
+  }> {
+    try {
+      const command = new HeadObjectCommand({
+        Bucket: this.bucket,
+        Key: key,
+      });
+
+      const response = await this.s3Client.send(command);
+
+      return {
+        size: response.ContentLength || 0,
+        contentType: response.ContentType || 'application/octet-stream',
+        lastModified: response.LastModified || new Date(),
+        metadata: response.Metadata || {},
+      };
+    } catch (error) {
+      if (error instanceof NotFound) {
+        throw new NotFoundException('File not found');
+      }
+      this.logger.error(`Failed to get metadata for: ${key}`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * Check if file exists
+   */
+  async fileExists(key: string): Promise<boolean> {
+    try {
+      await this.getFileMetadata(key);
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  /**
+   * Clean up old exports (older than 7 days)
+   */
+  async cleanupOldExports(maxAgeDays: number = 7): Promise<number> {
+    try {
+      const files = await this.listFiles('exports/');
+      const now = Date.now();
+      const maxAge = maxAgeDays * 24 * 60 * 60 * 1000;
+      let deletedCount = 0;
+
+      for (const key of files) {
+        const metadata = await this.getFileMetadata(key);
+        const fileAge = now - metadata.lastModified.getTime();
+
+        if (fileAge > maxAge) {
+          await this.deleteFile(key);
+          deletedCount++;
+        }
+      }
+
+      this.logger.log(`Cleaned up ${deletedCount} old exports`);
+      return deletedCount;
+    } catch (error) {
+      this.logger.error('Failed to cleanup old exports', error);
+      throw error;
+    }
+  }
+}
+
+Storage Controller
+// src/modules/storage/storage.controller.ts
+import {
+  Controller,
+  Post,
+  Get,
+  Delete,
+  UseInterceptors,
+  UploadedFile,
+  Param,
+  Body,
+  UseGuards,
+  Request,
+  Query,
+} from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
+import { R2Service } from './r2.service';
+import { ParseFilePipe, FileTypeValidator, MaxFileSizeValidator } from '@nestjs/common';
+
+@Controller('storage')
+@UseGuards(JwtAuthGuard)
+export class StorageController {
+  constructor(private r2Service: R2Service) {}
+
+  @Post('diagram/:diagramId')
+  @UseInterceptors(FileInterceptor('file'))
+  async uploadDiagram(
+    @Param('diagramId') diagramId: string,
+    @UploadedFile(
+      new ParseFilePipe({
+        validators: [
+          new FileTypeValidator({ fileType: 'image/(png|jpeg|svg)' }),
+          new MaxFileSizeValidator({ maxSize: 5 * 1024 * 1024 }), // 5MB
+        ],
+      }),
+    )
+    file: Express.Multer.File,
+  ) {
+    const format = file.originalname.endsWith('.svg') ? 'svg' : 
+                   file.originalname.endsWith('.jpg') ? 'jpg' : 'png';
+    
+    const url = await this.r2Service.uploadDiagram(diagramId, file.buffer, format);
+    
+    return {
+      success: true,
+      url,
+      filename: file.originalname,
+      size: file.size,
+    };
+  }
+
+  @Post('thumbnail/:diagramId')
+  @UseInterceptors(FileInterceptor('file'))
+  async uploadThumbnail(
+    @Param('diagramId') diagramId: string,
+    @UploadedFile(
+      new ParseFilePipe({
+        validators: [
+          new FileTypeValidator({ fileType: 'image/(png|jpeg)' }),
+          new MaxFileSizeValidator({ maxSize: 2 * 1024 * 1024 }), // 2MB
+        ],
+      }),
+    )
+    file: Express.Multer.File,
+  ) {
+    const url = await this.r2Service.uploadThumbnail(diagramId, file.buffer);
+    
+    return {
+      success: true,
+      url,
+      filename: file.originalname,
+    };
+  }
+
+  @Post('export')
+  @UseInterceptors(FileInterceptor('file'))
+  async uploadExport(
+    @Request() req,
+    @Body('diagramId') diagramId: string,
+    @Body('format') format: string,
+    @UploadedFile(
+      new ParseFilePipe({
+        validators: [
+          new FileTypeValidator({ fileType: 'application/zip' }),
+          new MaxFileSizeValidator({ maxSize: 50 * 1024 * 1024 }), // 50MB
+        ],
+      }),
+    )
+    file: Express.Multer.File,
+  ) {
+    const url = await this.r2Service.uploadCodeExport(
+      req.user.id,
+      diagramId,
+      file.buffer,
+      format,
+    );
+
+    // Generate signed URL (expires in 1 hour)
+    const key = `exports/${req.user.id}/${diagramId}/${file.filename}`;
+    const signedUrl = await this.r2Service.getSignedUrl(key, 3600);
+
+    return {
+      success: true,
+      url: signedUrl,
+      expiresAt: new Date(Date.now() + 3600 * 1000),
+    };
+  }
+
+  @Post('upload')
+  @UseInterceptors(FileInterceptor('file'))
+  async uploadFile(
+    @Request() req,
+    @UploadedFile(
+      new ParseFilePipe({
+        validators: [
+          new MaxFileSizeValidator({ maxSize: 50 * 1024 * 1024 }), // 50MB
+        ],
+      }),
+    )
+    file: Express.Multer.File,
+  ) {
+    const url = await this.r2Service.uploadUserFile(
+      req.user.id,
+      file.buffer,
+      file.originalname,
+      file.mimetype,
+    );
+
+    return {
+      success: true,
+      url,
+      filename: file.originalname,
+      size: file.size,
+    };
+  }
+
+  @Get('file/:key')
+  async getFile(@Param('key') key: string, @Query('signed') signed: string = 'true') {
+    if (signed === 'true') {
+      const signedUrl = await this.r2Service.getSignedUrl(key);
+      return { url: signedUrl };
+    }
+    
+    return { url: this.r2Service.getFileUrl(key) };
+  }
+
+  @Delete('file/:key')
+  async deleteFile(@Param('key') key: string) {
+    await this.r2Service.deleteFile(key);
+    return { success: true, message: 'File deleted' };
+  }
+}
+
+Storage module
+// src/modules/storage/storage.module.ts
+import { Module } from '@nestjs/common';
+import { R2Service } from './r2.service';
+import { StorageController } from './storage.controller';
+
+@Module({
+  providers: [R2Service],
+  controllers: [StorageController],
+  exports: [R2Service], // Export for use in other modules
+})
+export class StorageModule {}
+
+Cleanup CRON job
+// src/modules/storage/storage-cron.service.ts
+import { Injectable, Logger } from '@nestjs/common';
+import { Cron, CronExpression } from '@nestjs/schedule';
+import { R2Service } from './r2.service';
+
+@Injectable()
+export class StorageCronService {
+  private readonly logger = new Logger(StorageCronService.name);
+
+  constructor(private r2Service: R2Service) {}
+
+  // Run every day at 2 AM
+  @Cron(CronExpression.EVERY_DAY_AT_2AM)
+  async cleanupOldExports() {
+    this.logger.log('Starting cleanup of old exports...');
+    
+    try {
+      const deletedCount = await this.r2Service.cleanupOldExports(7);
+      this.logger.log(`Cleanup complete. Deleted ${deletedCount} files.`);
+    } catch (error) {
+      this.logger.error('Cleanup failed', error);
+    }
+  }
+}
+
+Testing the service
+// test/storage.e2e-spec.ts
+import { Test, TestingModule } from '@nestjs/testing';
+import { R2Service } from '../src/modules/storage/r2.service';
+import { ConfigModule } from '@nestjs/config';
+
+describe('R2Service', () => {
+  let service: R2Service;
+
+  beforeEach(async () => {
+    const module: TestingModule = await Test.createTestingModule({
+      imports: [ConfigModule.forRoot()],
+      providers: [R2Service],
+    }).compile();
+
+    service = module.get<R2Service>(R2Service);
+  });
+
+  it('should upload and download a file', async () => {
+    const testKey = 'test/hello.txt';
+    const testContent = 'Hello, R2!';
+    
+    // Upload
+    const url = await service.uploadFile(testKey, testContent, 'text/plain');
+    expect(url).toBeDefined();
+    
+    // Download
+    const buffer = await service.downloadFile(testKey);
+    expect(buffer.toString()).toBe(testContent);
+    
+    // Cleanup
+    await service.deleteFile(testKey);
+  });
+});
+
+
+Phase 3 - Export and Code Generation.
+1. EXPORT MODULE
+Create export module:
+nest g module export
+nest g controller export
+nest g service export
+
+src/modules/export/export.service.ts:
+import { Injectable } from '@nestjs/common';
+import { PrismaService } from '../../database/prisma.service';
+import { S3Service } from '../storage/s3.service';
+import { UsersService } from '../users/users.service';
+import * as JSZip from 'jszip';
+
+@Injectable()
+export class ExportService {
+  constructor(
+    private prisma: PrismaService,
+    private s3Service: S3Service,
+    private usersService: UsersService,
+  ) {}
+
+  async exportCode(userId: string, diagramId: string, format: string) {
+    // Deduct credits
+    await this.usersService.deductCredits(userId, 10, 'CODE_EXPORT');
+
+    const diagram = await this.prisma.diagram.findUnique({
+      where: { id: diagramId },
+    });
+
+    // Generate code based on format
+    const files = await this.generateCode(diagram, format);
+
+    // Create ZIP
+    const zip = new JSZip();
+    files.forEach((file) => {
+      zip.file(file.path, file.content);
+    });
+
+    const zipBuffer = await zip.generateAsync({ type: 'nodebuffer' });
+
+    // Upload to S3
+    const key = `exports/${userId}/${diagramId}/${Date.now()}.zip`;
+    const url = await this.s3Service.uploadFile(
+      key,
+      zipBuffer,
+      'application/zip',
+    );
+
+    // Save export record
+    const exportRecord = await this.prisma.export.create({
+      data: {
+        diagramId,
+        userId,
+        format,
+        filePath: key,
+        fileSize: zipBuffer.length,
+        expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+      },
+    });
+
+    return { downloadUrl: url, exportId: exportRecord.id };
+  }
+
+  private async generateCode(diagram: any, format: string) {
+    const nodes = diagram.nodes;
+    const edges = diagram.edges;
+
+    switch (format) {
+      case 'TERRAFORM':
+        return this.generateTerraform(nodes, edges);
+      case 'KUBERNETES':
+        return this.generateKubernetes(nodes, edges);
+      case 'DOCKER_COMPOSE':
+        return this.generateDockerCompose(nodes, edges);
+      case 'FASTAPI':
+        return this.generateFastAPI(nodes, edges);
+      default:
+        throw new Error('Unsupported format');
+    }
+  }
+
+  private generateTerraform(nodes: any[], edges: any[]) {
+    // Generate Terraform files from diagram
+    return [
+      { path: 'main.tf', content: 'resource "aws_instance" ...' },
+      { path: 'variables.tf', content: 'variable ...' },
+    ];
+  }
+
+  private generateKubernetes(nodes: any[], edges: any[]) {
+    // Generate K8s manifests
+    return [
+      { path: 'deployment.yaml', content: 'apiVersion: apps/v1 ...' },
+      { path: 'service.yaml', content: 'apiVersion: v1 ...' },
+    ];
+  }
+
+  private generateDockerCompose(nodes: any[], edges: any[]) {
+    // Generate docker-compose.yml
+    return [{ path: 'docker-compose.yml', content: 'version: "3" ...' }];
+  }
+
+  private generateFastAPI(nodes: any[], edges: any[]) {
+    // Generate FastAPI code
+    return [
+      { path: 'main.py', content: 'from fastapi import FastAPI ...' },
+      { path: 'requirements.txt', content: 'fastapi\nuvicorn\n' },
+    ];
+  }
+}
+
+2. DIAGRAM EXPORT SERVICE
+src/modules/export/diagram-export.service.ts:
+
+import { Injectable } from '@nestjs/common';
+import * as puppeteer from 'puppeteer';
+
+@Injectable()
+export class DiagramExportService {
+  async exportToPNG(diagramUrl: string) {
+    const browser = await puppeteer.launch();
+    const page = await browser.newPage();
+    await page.goto(diagramUrl, { waitUntil: 'networkidle0' });
+    const screenshot = await page.screenshot({ fullPage: true });
+    await browser.close();
+    return screenshot;
+  }
+
+  async exportToPDF(diagramUrl: string) {
+    const browser = await puppeteer.launch();
+    const page = await browser.newPage();
+    await page.goto(diagramUrl, { waitUntil: 'networkidle0' });
+    const pdf = await page.pdf({ format: 'A4', printBackground: true });
+    await browser.close();
+    return pdf;
+  }
+
+  exportToMermaid(nodes: any[], edges: any[]) {
+    let mermaid = 'graph TD\n';
+    nodes.forEach((node) => {
+      mermaid += `  ${node.id}[${node.label}]\n`;
+    });
+    edges.forEach((edge) => {
+      mermaid += `  ${edge.source} --> ${edge.target}\n`;
+    });
+    return mermaid;
+  }
+}
+
+3. TEMPLATES SYSTEM
+src/modules/templates/templates.service.ts:
+typescript
+
+import { Injectable } from '@nestjs/common';
+import { PrismaService } from '../../database/prisma.service';
+
+@Injectable()
+export class TemplatesService {
+  constructor(private prisma: PrismaService) {}
+
+  async findAll() {
+    return this.prisma.diagram.findMany({
+      where: { isTemplate: true, isPublic: true },
+      include: {
+        user: {
+          select: { username: true, avatarUrl: true },
+        },
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+
+  async findOne(id: string) {
+    return this.prisma.diagram.findUnique({
+      where: { id, isTemplate: true },
+    });
+  }
+
+  async create(userId: string, diagramId: string,  any) {
+    // Clone diagram as template
+    const diagram = await this.prisma.diagram.findUnique({
+      where: { id: diagramId },
+    });
+
+    const template = await this.prisma.diagram.create({
+       {
+        name: data.name,
+        description: data.description,
+        nodes: diagram.nodes,
+        edges: diagram.edges,
+        isTemplate: true,
+        isPublic: true,
+        userId,
+      },
+    });
+
+    return template;
+  }
+}
+
+PHASE 3 CHECKLIST
+Create export module
+Implement code generation (Terraform, K8s, Docker)
+Build diagram export (PNG, SVG, PDF, Mermaid)
+Integrate Puppeteer for PDF/PNG
+Create templates system
+Add ZIP file generation
+Implement S3 upload for exports
+Create download endpoints
+Add export expiration (7 days)
+Track export usage in credits
+Write tests for export services
+Deploy with Puppeteer support
+Build Phase 3 with focus on code accuracy and export quality.
+
+-------------------------------------------------
+Phase 4 - Real-time Collaboration with WebSockets.
+1. WEBSOCKET GATEWAY
+Install WebSocket dependencies:
+npm install @nestjs/websockets @nestjs/platform-socket.io socket.io
+
+src/modules/collaboration/collaboration.gateway.ts:
+import {
+  WebSocketGateway,
+  WebSocketServer,
+  SubscribeMessage,
+  OnGatewayConnection,
+  OnGatewayDisconnect,
+} from '@nestjs/websockets';
+import { Server, Socket } from 'socket.io';
+import { UseGuards } from '@nestjs/common';
+import { WsJwtAuthGuard } from '../../common/guards/ws-jwt-auth.guard';
+
+@WebSocketGateway({
+  cors: {
+    origin: process.env.FRONTEND_URL,
+    credentials: true,
+  },
+})
+export class CollaborationGateway
+  implements OnGatewayConnection, OnGatewayDisconnect
+{
+  @WebSocketServer()
+  server: Server;
+
+  async handleConnection(client: Socket) {
+    // Authenticate connection
+    const diagramId = client.handshake.query.diagramId as string;
+    const userId = client.handshake.auth.userId;
+
+    client.join(`diagram:${diagramId}`);
+
+    // Notify others
+    client.to(`diagram:${diagramId}`).emit('user:joined', { userId });
+  }
+
+  async handleDisconnect(client: Socket) {
+    const diagramId = client.handshake.query.diagramId as string;
+    const userId = client.handshake.auth.userId;
+
+    client.to(`diagram:${diagramId}`).emit('user:left', { userId });
+  }
+
+  @SubscribeMessage('node:update')
+  handleNodeUpdate(client: Socket, data: any) {
+    client.to(`diagram:${data.diagramId}`).emit('node:sync', data);
+  }
+
+  @SubscribeMessage('edge:update')
+  handleEdgeUpdate(client: Socket, data: any) {
+    client.to(`diagram:${data.diagramId}`).emit('edge:sync', data);
+  }
+
+  @SubscribeMessage('cursor:move')
+  handleCursorMove(client: Socket, data: any) {
+    client
+      .to(`diagram:${data.diagramId}`)
+      .emit('cursor:update', { userId: client.handshake.auth.userId, ...data });
+  }
+
+  @SubscribeMessage('comment:add')
+  async handleCommentAdd(client: Socket,  any) {
+    // Save comment to database
+    // Broadcast to room
+    client.to(`diagram:${data.diagramId}`).emit('comment:added', data);
+  }
+}
+
+2. COMMENTS MODULE
+src/modules/comments/comments.service.ts:
+typescript
+import { Injectable } from '@nestjs/common';
+import { PrismaService } from '../../database/prisma.service';
+
+@Injectable()
+export class CommentsService {
+  constructor(private prisma: PrismaService) {}
+
+  async create(diagramId: string, userId: string,  any) {
+    const comment = await this.prisma.comment.create({
+       {
+        diagramId,
+        userId,
+        content: data.content,
+        nodeId: data.nodeId,
+      },
+      include: {
+        user: {
+          select: { username: true, avatarUrl: true },
+        },
+      },
+    });
+
+    return comment;
+  }
+
+  async findAll(diagramId: string) {
+    return this.prisma.comment.findMany({
+      where: { diagramId, parentId: null },
+      include: {
+        user: {
+          select: { username: true, avatarUrl: true },
+        },
+        replies: {
+          include: {
+            user: {
+              select: { username: true, avatarUrl: true },
+            },
+          },
+        },
+      },
+      orderBy: { createdAt: 'asc' },
+    });
+  }
+
+  async resolve(commentId: string, userId: string) {
+    return this.prisma.comment.update({
+      where: { id: commentId },
+      data: { resolved: true },
+    });
+  }
+}
+
+PHASE 4 CHECKLIST
+Set up WebSocket gateway
+Implement real-time node sync
+Add multi-user cursor tracking
+Build comments system
+Create WebSocket authentication
+Handle connection/disconnection
+Implement room-based broadcasting
+Add conflict resolution
+Write tests for WebSocket events
+Load test with multiple users
+Deploy with WebSocket support
+Build Phase 4 with focus on low-latency sync and conflict handling.
+
+
+
