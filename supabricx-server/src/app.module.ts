@@ -10,12 +10,13 @@ import { AppService } from './app.service';
 import { databaseConfig } from './config/database.config';
 import { githubConfig } from './config/github.config';
 import { jwtConfig } from './config/jwt.config';
-import { s3Config } from './config/s3.config';
+import { r2Config } from './config/r2.config';
 import { DatabaseModule } from './database/database.module';
 import { AiModule } from './modules/ai/ai.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { BillingModule } from './modules/billing/billing.module';
 import { DiagramsModule } from './modules/diagrams/diagrams.module';
+import { StorageModule } from './modules/storage/storage.module';
 import { UsersModule } from './modules/users/users.module';
 
 @Module({
@@ -23,7 +24,7 @@ import { UsersModule } from './modules/users/users.module';
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: ['.env'],
-      load: [databaseConfig, githubConfig, jwtConfig, s3Config],
+      load: [databaseConfig, githubConfig, jwtConfig, r2Config],
     }),
     ScheduleModule.forRoot(),
     ThrottlerModule.forRoot([
@@ -58,6 +59,7 @@ import { UsersModule } from './modules/users/users.module';
     DiagramsModule,
     AiModule,
     BillingModule,
+    StorageModule,
   ],
   controllers: [AppController],
   providers: [AppService],
