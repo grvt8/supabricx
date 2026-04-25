@@ -16,7 +16,9 @@ import { AiModule } from './modules/ai/ai.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { BillingModule } from './modules/billing/billing.module';
 import { DiagramsModule } from './modules/diagrams/diagrams.module';
+import { ExportModule } from './modules/export/export.module';
 import { StorageModule } from './modules/storage/storage.module';
+import { TemplatesModule } from './modules/templates/templates.module';
 import { UsersModule } from './modules/users/users.module';
 
 @Module({
@@ -60,6 +62,8 @@ import { UsersModule } from './modules/users/users.module';
     AiModule,
     BillingModule,
     StorageModule,
+    ExportModule,
+    TemplatesModule,
   ],
   controllers: [AppController],
   providers: [AppService],
